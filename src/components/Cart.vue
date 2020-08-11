@@ -30,10 +30,9 @@
       <router-link to="/">Вернуться на главную</router-link>
     </div>
 
-    <h3 class="total" v-if="hasProduct()">Сумма: 
-      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">
-        {{ val.text }}
-      </span>
+    <h3 class="total" v-if="hasProduct()">
+      Сумма:
+      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
     <form id="js_form_order" v-if="hasProduct()">
@@ -250,7 +249,43 @@ import VueDadata from "vue-dadata";
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
-
+function getXmlHttp() {
+  let xmlhttp;
+  try {
+    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  } catch (e) {
+    try {
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (e) {
+      xmlhttp = false;
+    }
+  }
+  if (!xmlhttp && typeof XMLHttpRequest != "undefined") {
+    xmlhttp = new XMLHttpRequest();
+  }
+  return xmlhttp;
+}
+function makeAjax(metodType, path, body, callback) {
+  let getCallback = callback || function (data) {};
+  let xhr = getXmlHttp();
+  xhr.open(metodType, path, true);
+  xhr.onload = function () {
+    if (this.status == 200) {
+      let data;
+      try {
+        data = JSON.parse(this.responseText);
+      } catch (e) {
+        data = this.responseText;
+      }
+      getCallback(data);
+    } else {
+      alert("Error: " + this.status);
+    }
+  };
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  xhr.send(body);
+}
 export default {
   data() {
     return {
@@ -274,32 +309,53 @@ export default {
     deleteProduct() {
       let url =
         "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
-      let data = {
-        key: '1973',
-      };
+      let data = { key: 50586 };
+
       fetch(url, {
         method: "POST",
         withCredentials: true,
+        credentials: "include",
         cache: "no-store",
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
       })
         .then((response) => response.json())
         .then((json) => console.log("DELETE", json));
     },
+    queryParams(params) {
+      var esc = encodeURIComponent;
+      var query = Object.keys(params)
+        .map((k) => {
+          if (params[k] instanceof Object) {
+            let innetObj = Object.keys(params[k]).map(
+              (a) => `${'['+esc(a)+']'}=${esc(params[k][a])}`
+            ).join("&");
+            return k + innetObj
+          }
+          return `${esc(k)}=${esc(params[k])}`;
+        })
+        .join("&");
+      return query;
+    },
+
     addProductToCart() {
-      let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
       var data = {
-        product_id: 32805,
+        product_id: 19138,
         quantity: 3,
-        option: { 37973: 114783 },
+        option: { 31843: 102548 },
       };
 
       fetch(url, {
         method: "POST",
         credentials: "include",
         cache: "no-store",
-        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
       })
         .then((response) => {
           console.log("что то отправили", response, "че в дате", data);
@@ -325,8 +381,7 @@ export default {
     },
 
     checkedProduct() {
-      let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -437,7 +492,6 @@ export default {
     right: 0;
     font-size: 16px;
   }
-
 }
 
 .checkout-message {

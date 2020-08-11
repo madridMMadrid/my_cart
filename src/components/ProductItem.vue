@@ -24,11 +24,12 @@
           </li>
           <li class="char_list_material" v-if="getProductsInCart.option">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
-            <div></div>
+            <div>
+              <select v-model="selected">
+                <option v-for="(val, i) in options" :key="i">{{ val.name }}</option>
+              </select>
+            </div>
           </li>
-          <select v-model="selected">
-            <option v-for="(val, i) in options" :key="i">{{ val.name }}</option>
-          </select>
         </ul>
       </div>
     </td>
@@ -160,6 +161,11 @@ tr {
   }
   & .char_list_material {
     display: flex;
+    & select {
+      width: 100px;
+      border: none;
+      margin-left: 5px;
+    }
     & .custom-select {
       &:focus {
         box-shadow: none;
