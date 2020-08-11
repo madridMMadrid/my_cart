@@ -3,6 +3,7 @@
     <div class="wrapperCheckedProd">
       <button @click="addProductToCart()">add</button>
       <button @click="checkedProduct()">checked</button>
+      <button @click="deleteProduct()">DELETE</button>
     </div>
     <ul>
       <table class="resp-tab">
@@ -13,8 +14,8 @@
             :key="product.id"
             :index="index"
             :getProductsInCart="product"
-          /> -->
-          <CheckoutProductSumm
+          />-->
+          <ProductItem
             class="checkout-list"
             v-for="(product, index) in gerRualProductInCart.products"
             :key="product.cart_id"
@@ -28,7 +29,12 @@
       <h3>Нет товара...</h3>
       <router-link to="/">Вернуться на главную</router-link>
     </div>
-    <h3 class="total" v-if="hasProduct()">Сумма: {{ totalPrice() }}</h3>
+
+    <h3 class="total" v-if="hasProduct()">Сумма: 
+      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">
+        {{ val.text }}
+      </span>
+    </h3>
 
     <form id="js_form_order" v-if="hasProduct()">
       <div class="order_block form_border_style clearfix">
@@ -242,7 +248,7 @@
 import { mapGetters, mapActions } from "vuex";
 import VueDadata from "vue-dadata";
 
-import CheckoutProductSumm from "./ProductItem";
+import ProductItem from "./ProductItem";
 import { log } from "util";
 
 export default {
@@ -256,7 +262,7 @@ export default {
     };
   },
   components: {
-    CheckoutProductSumm,
+    ProductItem,
     VueDadata,
   },
   computed: {
@@ -265,13 +271,28 @@ export default {
 
   methods: {
     ...mapActions("products", ["removeProduct"]),
-
+    deleteProduct() {
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
+      let data = {
+        key: '1973',
+      };
+      fetch(url, {
+        method: "POST",
+        withCredentials: true,
+        cache: "no-store",
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((json) => console.log("DELETE", json));
+    },
     addProductToCart() {
-      let url = "http://www.prime-wood.ru/index.php?route=checkout/test_cart/add";
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
       var data = {
-        product_id: 1972,
+        product_id: 32805,
         quantity: 3,
-        option: { 1212: 4673 },
+        option: { 37973: 114783 },
       };
 
       fetch(url, {
@@ -304,7 +325,8 @@ export default {
     },
 
     checkedProduct() {
-      let url = "http://www.prime-wood.ru/index.php?route=checkout/test_cart/info";
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -406,6 +428,16 @@ export default {
   font-size: 2em;
   font-weight: bold;
   align-self: flex-end;
+  position: relative;
+  padding-right: 38px;
+  &::before {
+    content: "РУБ";
+    position: absolute;
+    top: 4px;
+    right: 0;
+    font-size: 16px;
+  }
+
 }
 
 .checkout-message {

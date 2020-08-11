@@ -1,34 +1,34 @@
 <template>
   <tr>
     <td>
-      <img :src="getProductsInCart.image" alt class="product-image" />
+      <img :src="getProductsInCart.href" alt class="product-image" />
     </td>
     <td>
       <div class="product-name">
         <router-link to="/" tag="a">{{ getProductsInCart.name }}</router-link>
         <ul class="chars_list">
           <li>
-            <span class="bold">Артикул:</span> V-1.16
+            <span class="bold">Артикул:</span>
+            {{getProductsInCart.sku}}
           </li>
           <li>
             <span class="bold">Размер:</span>
             <span class="dimensions">
-              <i>↔</i> 110 см
-              <i class="width">↔</i> 55 см
-              <i>↕</i> 76.50 см
+              <i>↔</i>
+              {{getProductsInCart.proportions.width}}
+              <i class="width">↔</i>
+              {{getProductsInCart.proportions.length}}
+              <i>↕</i>
+              {{getProductsInCart.proportions.height}}
             </span>
           </li>
-          <li class="char_list_material" v-if="getProductsInCart.options">
-            <div class="bold">Материал:</div>
-            <div>
-              <b-form-select
-                v-model="changeSelect"
-                :options="getProductsInCart.options"
-                size="sm"
-                class="mt-3 my_select"
-              ></b-form-select>
-            </div>
+          <li class="char_list_material" v-if="getProductsInCart.option">
+            <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
+            <div></div>
           </li>
+          <select v-model="selected">
+            <option v-for="(val, i) in options" :key="i">{{ val.name }}</option>
+          </select>
         </ul>
       </div>
     </td>
@@ -39,8 +39,7 @@
     </td>
     <td>
       <div class="currentSum">
-        <div>{{ getProductsInCart.price * getProductsInCart.qty }}</div>
-        <div>РУБ</div>
+        <div>{{ getProductsInCart.total }}</div>
       </div>
     </td>
     <td>
@@ -48,7 +47,7 @@
         @totalCurrentSummMore="totalSummMore"
         @totalCurrentSummLess="totalSummLess"
         :price="getProductsInCart.price"
-        :qty="getProductsInCart.qty"
+        :qty="getProductsInCart.quantity"
         :AllInfoForProduct="getProductsInCart"
       />
     </td>
@@ -72,7 +71,9 @@ export default {
   data() {
     return {
       totalCurrenSumm: 0,
-      changeSelect: this.getProductsInCart.selected
+      changeSelect: this.getProductsInCart.selected,
+      options: this.getProductsInCart.option[0].product_option_value,
+      selected: this.getProductsInCart.option[0].product_option_value[0].name,
     };
   },
   methods: {
@@ -85,14 +86,14 @@ export default {
     },
     totalSummLess(data) {
       this.totalCurrenSumm = data;
-    }
-  },
-   watch: {
-    changeSelect(val) {
-      let infoForProduct = {'a': this.getProductsInCart, 'b': val}
-      this.changeCoff(infoForProduct)
     },
-  }
+  },
+  watch: {
+    changeSelect(val) {
+      let infoForProduct = { a: this.getProductsInCart, b: val };
+      this.changeCoff(infoForProduct);
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -217,34 +218,34 @@ tr {
   font-size: 20px;
   font-weight: bold;
   color: #ff9e24;
-  padding-right: 30px;
   line-height: 17px;
   position: relative;
   white-space: nowrap;
-
+  padding-right: 25px;
   &:before {
     content: "РУБ";
     position: absolute;
-    top: 0;
+    top: -1px;
     right: 0;
-    font-size: 12px;
+    font-size: 10px;
   }
 }
 .currentSum {
   font-size: 20px;
   font-weight: bold;
   color: #888;
-  line-height: 17px;
   display: flex;
   margin: auto;
   justify-content: center;
-  & div {
-    &:first-child {
-      white-space: nowrap;
-    }
-    &:last-child {
-      font-size: 12px;
-      margin-left: 5px;
+  & > div {
+    position: relative;
+    padding-right: 25px;
+    &::before {
+      content: "РУБ";
+      position: absolute;
+      top: 4px;
+      right: 0;
+      font-size: 10px;
     }
   }
 }
@@ -258,6 +259,4 @@ tr {
   color: #fff;
   cursor: pointer;
 }
-
-
 </style>  

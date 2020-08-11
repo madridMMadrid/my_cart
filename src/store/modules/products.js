@@ -266,7 +266,7 @@ export default {
         loadItems(store) {
             store.commit('clearItems');
             let url =
-                "http://www.prime-wood.ru/index.php?route=checkout/test_cart/info";
+                "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
             fetch(url, {
                 method: "GET",
                 credentials: 'include',
