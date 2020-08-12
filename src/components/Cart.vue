@@ -3,7 +3,7 @@
     <div class="wrapperCheckedProd">
       <button @click="addProductToCart()">add</button>
       <button @click="checkedProduct()">checked</button>
-      <button @click="deleteProduct()">DELETE</button>
+      <button @click="remove()">DELETE</button>
     </div>
     <ul>
       <table class="resp-tab">
@@ -21,6 +21,7 @@
             :key="product.cart_id"
             :index="index"
             :getProductsInCart="product"
+            @ProductItemAdd="addProd"
           />
         </tbody>
       </table>
@@ -306,51 +307,55 @@ export default {
 
   methods: {
     ...mapActions("products", ["removeProduct"]),
-    deleteProduct() {
-      let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
-      let data = { key: 50586 };
-
-      fetch(url, {
-        method: "POST",
-        withCredentials: true,
-        credentials: "include",
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: this.queryParams(data),
-      })
-        .then((response) => response.json())
-        .then((json) => console.log("DELETE", json));
-    },
     queryParams(params) {
       var esc = encodeURIComponent;
       var query = Object.keys(params)
         .map((k) => {
           if (params[k] instanceof Object) {
-            let innetObj = Object.keys(params[k]).map(
-              (a) => `${'['+esc(a)+']'}=${esc(params[k][a])}`
-            ).join("&");
-            return k + innetObj
+            let innetObj = Object.keys(params[k])
+              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+              .join("&");
+            return k + innetObj;
           }
           return `${esc(k)}=${esc(params[k])}`;
         })
         .join("&");
       return query;
     },
+    // remove(id) {
+    //   let url =
+    //     "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
+    //   let data = { key: 50931 };
 
-    addProductToCart() {
+    //   fetch(url, {
+    //     method: "POST",
+    //     withCredentials: true,
+    //     credentials: "include",
+    //     cache: "no-store",
+    //     headers: {
+    //       "Content-Type": "application/x-www-form-urlencoded",
+    //     },
+    //     body: this.queryParams(data),
+    //   })
+    //     .then((response) => response.json())
+    //     .then((json) => console.log("DELETE", json));
+    // },
+    addProd(payload) {
+      // console.log('получили из компонента', payload)
+      this.addProductToCart(payload)
+    },
+    addProductToCart(data) {
       let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
       var data = {
-        product_id: 19138,
-        quantity: 3,
-        option: { 31843: 102548 },
+        product_id: data.product_id,
+        quantity: 1,
+        option: data.option,
       };
 
       fetch(url, {
         method: "POST",
         credentials: "include",
+        withCredentials: true,
         cache: "no-store",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -385,6 +390,8 @@ export default {
       fetch(url, {
         method: "GET",
         credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
       })
         .then((response) => response.json())
         .then((json) => console.log("че в json", json));

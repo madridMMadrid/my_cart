@@ -11,6 +11,7 @@
 </template>
 <script>
 import { mapActions } from "vuex";
+import { log } from 'util';
 
 export default {
   props: ["price", "qty", "AllInfoForProduct"],
@@ -40,6 +41,7 @@ export default {
       this.plusQty(this.AllInfoForProduct);
     },
     lessCaunt() {
+      console.log('plusMinus')
       if (this.summa <= 1) {
         return;
       }

@@ -44,11 +44,11 @@
       </div>
     </td>
     <td>
-      <PlusMinusForCheckout
+      <PlusMinus
         @totalCurrentSummMore="totalSummMore"
         @totalCurrentSummLess="totalSummLess"
         :price="getProductsInCart.price"
-        :qty="getProductsInCart.quantity"
+        :qty="+getProductsInCart.quantity"
         :AllInfoForProduct="getProductsInCart"
       />
     </td>
@@ -56,18 +56,19 @@
       <span class="product-price">{{ getProductsInCart.price }}</span>
     </td>
     <td>
-      <button class="product-remove" @click="remove(index)">X</button>
+      <button class="product-remove" @click="remove(getProductsInCart.cart_id)">X</button>
     </td>
   </tr>
 </template>
 <script>
 import { mapActions } from "vuex";
 
-import PlusMinusForCheckout from "./PlusMinus";
+import PlusMinus from "./PlusMinus";
+import { log } from "util";
 export default {
   props: ["getProductsInCart", "index"],
   components: {
-    PlusMinusForCheckout,
+    PlusMinus,
   },
   data() {
     return {
@@ -75,18 +76,60 @@ export default {
       changeSelect: this.getProductsInCart.selected,
       options: this.getProductsInCart.option[0].product_option_value,
       selected: this.getProductsInCart.option[0].product_option_value[0].name,
+      one: this.getProductsInCart.option[0].product_option_id,
+      two: this.getProductsInCart.option[0].product_option_value_id
+
     };
   },
   methods: {
     ...mapActions("products", ["removeProduct", "changeCoff"]),
-    remove(index) {
-      this.removeProduct(index);
+    queryParams(params) {
+      //   this.removeProduct(index);
+      var esc = encodeURIComponent;
+      var query = Object.keys(params)
+        .map((k) => {
+          if (params[k] instanceof Object) {
+            let innetObj = Object.keys(params[k])
+              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+              .join("&");
+            return k + innetObj;
+          }
+          return `${esc(k)}=${esc(params[k])}`;
+        })
+        .join("&");
+      return query;
+    },
+    remove(id) {
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
+      let data = { key: id };
+
+      fetch(url, {
+        method: "POST",
+        withCredentials: true,
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
+      })
+        .then((response) => response.json())
+        .then((json) => console.log("DELETE", json));
     },
     totalSummMore(data) {
+      let obj = {};
+      obj[+this.one] = +this.two
+      this.$emit("ProductItemAdd", {
+        product_id: this.getProductsInCart.product_id,
+        quantity: this.getProductsInCart.quantity,
+        option: obj,
+      });
+
       this.totalCurrenSumm = data;
     },
     totalSummLess(data) {
-      this.totalCurrenSumm = data;
+      // this.totalCurrenSumm = data;
     },
   },
   watch: {
