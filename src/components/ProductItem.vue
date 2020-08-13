@@ -1,7 +1,7 @@
 <template>
   <tr>
     <td>
-      <img :src="getProductsInCart.href" alt class="product-image" />
+      <img :src="getProductsInCart.thumb" alt class="product-image" />
     </td>
     <td>
       <div class="product-name">
@@ -22,7 +22,7 @@
               {{getProductsInCart.proportions.height}}
             </span>
           </li>
-          <li class="char_list_material" v-if="getProductsInCart.option">
+          <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
             <div>
               <select v-model="selected" placeholder="введите несколько строчек">
@@ -73,17 +73,21 @@ export default {
     return {
       totalCurrenSumm: 0,
       product_id: this.getProductsInCart.product_id,
-      options: this.getProductsInCart.option[0].product_option_value,
-      selected: this.getProductsInCart.option[0].product_option_value[0].name,
+      options: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value,
+      selected: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value[0].name,
       selectValue: null,
       qty: 0,
 
       cart_id: this.getProductsInCart.cart_id,
-      one: this.getProductsInCart.option[0].product_option_id,
-      two: this.getProductsInCart.option[0].product_option_value_id,
+      one: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_id,
+      two: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value_id,
     };
   },
-  computed: {},
+  created() {
+  },
+  computed: {
+
+  },
   methods: {
     ...mapActions("products", ["removeProduct"]),
     sumQty(e) {

@@ -30,8 +30,8 @@ export default {
       totalSum: this.price,
       product_id: this.AllInfoForProduct.product_id,
       cart_id: this.AllInfoForProduct.cart_id,
-      one: this.AllInfoForProduct.option[0].product_option_id,
-      two: this.AllInfoForProduct.option[0].product_option_value_id,
+      one: this.AllInfoForProduct.option == 0 || this.AllInfoForProduct.option[0].product_option_id,
+      two: this.AllInfoForProduct.option == 0 || this.AllInfoForProduct.option[0].product_option_value_id,
       moreDisabled: false,
       lessDisabled: false,
     };

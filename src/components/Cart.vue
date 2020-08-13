@@ -14,6 +14,7 @@
             :key="product.cart_id"
             :index="index"
             :getProductsInCart="product"
+            
           />
         </tbody>
       </table>
