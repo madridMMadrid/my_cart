@@ -12,9 +12,10 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import VueDadata from 'vue-dadata'
+import Vuelidate from 'vuelidate'
 
 Vue.use(VueDadata)
- 
+Vue.use(Vuelidate)
 Vue.use(AxiosPlugin)
 Vue.use(VueAxios, axios)
 

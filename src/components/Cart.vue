@@ -14,7 +14,6 @@
             :key="product.cart_id"
             :index="index"
             :getProductsInCart="product"
-            
           />
         </tbody>
       </table>
@@ -29,7 +28,7 @@
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
-    <form id="js_form_order" v-if="hasProduct()">
+    <form id="js_form_order" v-if="hasProduct()" @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
@@ -63,11 +62,19 @@
         <div class="left">
           <div class="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
-            <label>
-              ФИО
-              <span class="orange">*</span>
-            </label>
-            <input type="text" name="firstname" value data-required class="js_localsave" />
+            <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
+              <label class="form__label">ФИО<span class="orange">*</span></label>
+              <input class="form__input" v-model.trim="$v.fio.$model" />
+            </div>
+            <div class="error" v-if="!$v.fio.required">Имя должно быть от 1 до 32 символов!</div>
+            <div
+              class="error"
+              v-if="!$v.fio.minLength"
+            >Маловато {{$v.fio.$params.minLength.min}} letters.</div>
+            <div
+              class="error"
+              v-if="!$v.fio.maxLength"
+            >Перебор {{$v.fio.$params.maxLength.max}}.</div>
 
             <label>
               Номер телефона
@@ -165,6 +172,7 @@
           <div id="requisites" style="display: block;" v-if="picked == 'forUr'">
             <div class="gr_ttl">Реквизиты плательщика</div>
             <input type="hidden" name="organization[empty]" />
+
             <div class="fields_wrap">
               <label>Юридический адрес</label>
               <input
@@ -224,13 +232,26 @@
               </div>
               <div class="right_block">
                 <div class="total_order_price">
-                  {{ totalPrice() }}
-                  <span class="sup">руб</span>
+                  <span
+                    v-for="(val, i) in gerRualProductInCart.totals"
+                    :key="i"
+                    class="sup"
+                  >{{ val.text }} руб</span>
                 </div>
               </div>
             </div>
           </div>
-          <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" />
+          <!-- <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" /> -->
+          <button
+            class="button orange_btn btn_big"
+            type="submit"
+            :disabled="submitStatus === 'PENDING'"
+          >ОТПРАВИТЬ</button>
+          <p class="typo__p" v-if="submitStatus === 'OK'">Thanks for your submission!</p>
+          <p class="typo__p" v-if="submitStatus === 'ERROR'">Please fill the form correctly.</p>
+          <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
+
+          <button class="button" @click="$v.$reset">$reset</button>
         </div>
       </div>
     </form>
@@ -240,46 +261,10 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import VueDadata from "vue-dadata";
+import { required, minLength, between, maxLength  } from "vuelidate/lib/validators";
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
-function getXmlHttp() {
-  let xmlhttp;
-  try {
-    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-  } catch (e) {
-    try {
-      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    } catch (e) {
-      xmlhttp = false;
-    }
-  }
-  if (!xmlhttp && typeof XMLHttpRequest != "undefined") {
-    xmlhttp = new XMLHttpRequest();
-  }
-  return xmlhttp;
-}
-function makeAjax(metodType, path, body, callback) {
-  let getCallback = callback || function (data) {};
-  let xhr = getXmlHttp();
-  xhr.open(metodType, path, true);
-  xhr.onload = function () {
-    if (this.status == 200) {
-      let data;
-      try {
-        data = JSON.parse(this.responseText);
-      } catch (e) {
-        data = this.responseText;
-      }
-      getCallback(data);
-    } else {
-      alert("Error: " + this.status);
-    }
-  };
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-  xhr.send(body);
-}
 export default {
   data() {
     return {
@@ -288,6 +273,9 @@ export default {
       random: Math.floor(Math.random() * 100000),
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
       selectedReg: "",
+      fio: "",
+      age: 0,
+      submitStatus: null,
     };
   },
   components: {
@@ -297,9 +285,28 @@ export default {
   computed: {
     ...mapGetters("products", ["getProductsInCart", "gerRualProductInCart"]),
   },
-
+  validations: {
+    fio: {
+      required,
+      minLength: minLength(4),
+      maxLength: maxLength(6)
+    },
+  },
   methods: {
     ...mapActions("products", ["removeProduct"]),
+    submit() {
+      console.log("submit!");
+      this.$v.$touch();
+      if (this.$v.$invalid) {
+        this.submitStatus = "ERROR";
+      } else {
+        // do your submit logic here
+        this.submitStatus = "PENDING";
+        setTimeout(() => {
+          this.submitStatus = "OK";
+        }, 500);
+      }
+    },
     queryParams(params) {
       var esc = encodeURIComponent;
       var query = Object.keys(params)
@@ -321,7 +328,7 @@ export default {
         product_id: 1513,
         quantity: 1,
         cart_id: 51808,
-        option: {796: 2858},
+        option: { 796: 2858 },
       };
       this.moreDisabled = true;
       fetch(url, {
@@ -726,5 +733,84 @@ export default {
 }
 .custom-checkbox:checked + label::after {
   opacity: 1;
+}
+
+input {
+  border: 1px solid silver;
+  border-radius: 4px;
+  background: white;
+  padding: 5px 10px;
+  width: 250px;
+}
+
+.dirty {
+  border-color: #5a5;
+  background: #efe;
+}
+
+.dirty:focus {
+  outline-color: #8e8;
+}
+
+.error {
+  border-color: red;
+  background: #fdd;
+}
+.form-group {
+  margin-bottom: 9px;
+}
+.form-group__message,
+.error {
+  font-size: 0.75rem;
+  display: none;
+  margin-bottom: 5px;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.error:focus {
+  outline-color: #f99;
+}
+.form-group--success .form-group__addon {
+  color: white;
+  border-color: #85d0a1;
+  background: #85d0a1;
+}
+
+.form-group--success input,
+.form-group--success textarea,
+.form-group--success input:focus,
+.form-group--success input:hover {
+  border-color: #85d0a1;
+}
+
+.form-group--success + .form-group__message,
+.form-group--success + .error {
+  display: block;
+  color: #73c893;
+}
+
+.form-group--error .form__label,
+.form-group--error .form__label--inline {
+  color: #f04124;
+}
+
+.form-group--error .form-group__addon {
+  color: white;
+  border-color: #f79483;
+  background: #f79483;
+}
+
+.form-group--error input,
+.form-group--error textarea,
+.form-group--error input:focus,
+.form-group--error input:hover {
+  border-color: #f79483;
+}
+
+.form-group--error + .form-group__message,
+.form-group--error + .error {
+  display: block;
+  color: #f57f6c;
 }
 </style>
