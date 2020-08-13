@@ -2,7 +2,9 @@
   <div>
     <div class="product-card-buy-count d-flex ai-c">
       <div class="product-card-buy-count-controls">
-        <div v-if="lessDisabled" class="less disabled"></div>
+        <div v-if="lessDisabled" class="less disabled">
+          <b-spinner small label="Small Spinner"></b-spinner>
+        </div>
         <div v-else class="less" @click="lessCaunt()"></div>
         <input
           type="number"
@@ -12,7 +14,9 @@
           v-model="summa"
           value="summa"
         />
-        <div v-if="moreDisabled" class="more disabled"></div>
+        <div v-if="moreDisabled" class="more disabled">
+          <b-spinner small label="Small Spinner"></b-spinner>
+        </div>
         <div v-else class="more" @click="moreCaunt()"></div>
       </div>
     </div>
@@ -30,8 +34,12 @@ export default {
       totalSum: this.price,
       product_id: this.AllInfoForProduct.product_id,
       cart_id: this.AllInfoForProduct.cart_id,
-      one: this.AllInfoForProduct.option == 0 || this.AllInfoForProduct.option[0].product_option_id,
-      two: this.AllInfoForProduct.option == 0 || this.AllInfoForProduct.option[0].product_option_value_id,
+      one:
+        this.AllInfoForProduct.option == 0 ||
+        this.AllInfoForProduct.option[0].product_option_id,
+      two:
+        this.AllInfoForProduct.option == 0 ||
+        this.AllInfoForProduct.option[0].product_option_value_id,
       moreDisabled: false,
       lessDisabled: false,
     };
@@ -74,8 +82,14 @@ export default {
         quantity: data.qty,
         cart_id: data.cart_id,
         option: data.option,
+        inerator: data.inerator
       };
-      this.moreDisabled = true;
+      console.log('че в итераторе', data.inerator)
+      if (data.inerator == 1) {
+        this.moreDisabled = true;
+      } else {
+        this.lessDisabled = true;
+      }
       fetch(url, {
         method: "POST",
         credentials: "include",
@@ -101,14 +115,15 @@ export default {
           }
           return response.json();
         })
-        .then((data) => {
-          this.moreDisabled = false;
+        .then((res) => {
           if (data.inerator == 1) {
+            this.moreDisabled = false;
             this.plusQty(this.AllInfoForProduct);
           } else {
+            this.lessDisabled = false;
             this.minusQty(this.AllInfoForProduct);
           }
-          console.log("Делаем что-то с данными.", data);
+          console.log("Делаем что-то с данными.", res);
         })
         .catch((error) => {
           console.log("что то пошло не так", error);
@@ -148,6 +163,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.spinner-border {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+  margin: auto;
+}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -185,6 +206,7 @@ input::-webkit-inner-spin-button {
       & .more {
         &.disabled {
           cursor: not-allowed;
+          display: flex;
         }
         &:before {
           content: "+";
@@ -193,6 +215,7 @@ input::-webkit-inner-spin-button {
       & .less {
         &.disabled {
           cursor: not-allowed;
+          display: flex;
         }
         &:before {
           content: "-";
