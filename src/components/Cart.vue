@@ -1,7 +1,30 @@
 <template>
   <div class="checkout-box">
+    <div>
+      <h1>В категории: {{ categoryTotal }}</h1>
+      <div class="products">
+        <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
+          <div>{{ product.name }}</div>
+          <div>
+            <img :src="product.thumb" :alt="product.name" />
+          </div>
+          <div>{{ product.product_id }}</div>
+          <div>{{ product.options }}</div>
+          <button
+            @click="addProductToCart({id:product.product_id, options:product.options})"
+          >Добавить в корзину</button>
+        </div>
+        <hr />
+        <div>
+          <input type="text" v-model="productToCategory" placeholder="Category" />
+          <input type="text" v-model="productLimit" placeholder="Limit" />
+          <button @click.prevent="loadProducts()">Загрузить из категории</button>
+        </div>
+        <hr />
+      </div>
+    </div>
     <div class="wrapperCheckedProd">
-      <button @click="editProductToCart()">add</button>
+      <!-- <button @click="editProductToCart()">add</button> -->
       <button @click="checkedProduct()">checked</button>
       <button @click="remove()">DELETE</button>
     </div>
@@ -63,18 +86,21 @@
           <div class="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
             <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
-              <label class="form__label">ФИО<span class="orange">*</span></label>
+              <label class="form__label">
+                ФИО
+                <span class="orange">*</span>
+              </label>
               <input class="form__input" v-model.trim="$v.fio.$model" />
             </div>
             <div class="error" v-if="!$v.fio.required">Имя должно быть от 1 до 32 символов!</div>
             <div
               class="error"
               v-if="!$v.fio.minLength"
-            >Маловато {{$v.fio.$params.minLength.min}} letters.</div>
+            >Меньше {{$v.fio.$params.minLength.min}} символов.</div>
             <div
               class="error"
               v-if="!$v.fio.maxLength"
-            >Перебор {{$v.fio.$params.maxLength.max}}.</div>
+            >Больше {{$v.fio.$params.maxLength.max}} символов.</div>
 
             <label>
               Номер телефона
@@ -261,7 +287,12 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import VueDadata from "vue-dadata";
-import { required, minLength, between, maxLength  } from "vuelidate/lib/validators";
+import {
+  required,
+  minLength,
+  between,
+  maxLength,
+} from "vuelidate/lib/validators";
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
@@ -276,6 +307,11 @@ export default {
       fio: "",
       age: 0,
       submitStatus: null,
+
+      categoryTotal: 0,
+      categoryProducts: [],
+      productToCategory: "",
+      productLimit: "",
     };
   },
   components: {
@@ -288,12 +324,25 @@ export default {
   validations: {
     fio: {
       required,
-      minLength: minLength(4),
-      maxLength: maxLength(6)
+      minLength: minLength(3),
+      maxLength: maxLength(32),
     },
   },
   methods: {
     ...mapActions("products", ["removeProduct"]),
+
+    loadProducts() {
+      this.makeAjax(
+        "GET",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        "",
+        (response) => {
+          console.log("response", response);
+          this.categoryTotal = response.total ?? 0;
+          this.categoryProducts = response.products ?? [];
+        }
+      );
+    },
     submit() {
       console.log("submit!");
       this.$v.$touch();
@@ -322,14 +371,20 @@ export default {
         .join("&");
       return query;
     },
-    editProductToCart(data) {
+    addProductToCart(data) {
       let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
-      var data = {
-        product_id: 1513,
+      let len = data.options.length;
+      let changeData = {
+        product_id: data.id,
         quantity: 1,
-        cart_id: 51808,
-        option: { 796: 2858 },
       };
+      if (len != 0) {
+        let obj = {};
+        obj[+data.options[0].product_option_id] = +data.options[0]
+          .product_option_value;
+        changeData["option"] = obj;
+      }
+
       this.moreDisabled = true;
       fetch(url, {
         method: "POST",
@@ -339,7 +394,7 @@ export default {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: this.queryParams(data),
+        body: this.queryParams(changeData),
       })
         .then((response) => {
           console.log("что то отправили", response, "че в дате", data);
@@ -431,6 +486,20 @@ export default {
 };
 </script>
 <style lang="scss">
+/* BeardedCode */
+.products {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.product_card {
+  width: 25%;
+  outline: 1px solid #ddd;
+}
+.product_card img {
+  max-width: 100%;
+}
+/* BeardedCode */
 .wrapperCheckedProd {
   display: flex;
 }
