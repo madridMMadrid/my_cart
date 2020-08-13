@@ -1,5 +1,26 @@
 <template>
   <div class="checkout-box">
+
+    <div>
+      <h1>В категории: {{ categoryTotal }}</h1>
+      <div class="products">
+        <div class="product_card" v-for="product in categoryProducts">
+          <div>{{ product.name }}</div>
+          <div><img :src="product.thumb" :alt="product.name"></div>
+          <div>{{ product.id }}</div>
+          <div>{{ product.options }}</div>
+          <button v-on:click="addProductToCart(product.id, product.options)">Добавить в корзину</button>
+        </div>
+        <hr>
+        <div>
+          <input type="text" v-model="productToCategory" placeholder="Category">
+          <input type="text" v-model="productLimit" placeholder="Limit">
+          <button v-on:click.event.prevent="loadProducts">Загрузить из категории</button>
+        </div>
+        <hr>
+      </div>
+    </div>
+
     <div class="wrapperCheckedProd">
       <button @click="addProductToCart()">add</button>
       <button @click="checkedProduct()">checked</button>
@@ -8,14 +29,14 @@
     <ul>
       <table class="resp-tab">
         <tbody>
-          <ProductItem
+        <ProductItem
             class="checkout-list"
             v-for="(product, index) in gerRualProductInCart.products"
             :key="product.cart_id"
             :index="index"
             :getProductsInCart="product"
-            
-          />
+
+        />
         </tbody>
       </table>
     </ul>
@@ -36,25 +57,25 @@
         <div class="entity_wrap entity_wrap_l">
           <div class="checkbox">
             <input
-              class="custom-checkbox"
-              type="radio"
-              id="color-1"
-              name="color"
-              value="forUr"
-              checked
-              v-model="picked"
+                class="custom-checkbox"
+                type="radio"
+                id="color-1"
+                name="color"
+                value="forUr"
+                checked
+                v-model="picked"
             />
             <label for="color-1">Для юридических лиц</label>
           </div>
 
           <div class="checkbox">
             <input
-              class="custom-checkbox"
-              type="radio"
-              id="color-2"
-              name="color"
-              value="forFiz"
-              v-model="picked"
+                class="custom-checkbox"
+                type="radio"
+                id="color-2"
+                name="color"
+                value="forFiz"
+                v-model="picked"
             />
             <label for="color-2">Для физических лиц</label>
           </div>
@@ -67,62 +88,62 @@
               ФИО
               <span class="orange">*</span>
             </label>
-            <input type="text" name="firstname" value data-required class="js_localsave" />
+            <input type="text" name="firstname" value data-required class="js_localsave"/>
 
             <label>
               Номер телефона
               <span class="orange">*</span>
             </label>
-            <input type="text" name="telephone" value class="phone_mask js_localsave" data-required />
+            <input type="text" name="telephone" value class="phone_mask js_localsave" data-required/>
 
             <label>
               E-mail
               <span class="orange">*</span>
             </label>
-            <input type="text" name="email" value data-required class="js_localsave" />
+            <input type="text" name="email" value data-required class="js_localsave"/>
           </div>
 
           <div class="gr_ttl">Способ доставки</div>
           <div class="entity_wrap" id="js_shipping_method">
             <div class="checkbox">
               <input
-                class="custom-checkbox"
-                type="radio"
-                id="color-3"
-                name="color_delivery"
-                value="delivery"
-                checked
-                v-model="picked_delivery"
+                  class="custom-checkbox"
+                  type="radio"
+                  id="color-3"
+                  name="color_delivery"
+                  value="delivery"
+                  checked
+                  v-model="picked_delivery"
               />
               <label for="color-3">Доставка</label>
             </div>
 
             <div class="checkbox">
               <input
-                class="custom-checkbox"
-                type="radio"
-                id="color-4"
-                name="color_delivery"
-                value="no_delivery"
-                v-model="picked_delivery"
+                  class="custom-checkbox"
+                  type="radio"
+                  id="color-4"
+                  name="color_delivery"
+                  value="no_delivery"
+                  v-model="picked_delivery"
               />
               <label for="color-4">Свмовывоз</label>
             </div>
           </div>
 
           <div
-            class="deliv_addr js_delivery_toggle"
-            data-block="flat.flat"
-            v-if="picked_delivery == 'delivery'"
+              class="deliv_addr js_delivery_toggle"
+              data-block="flat.flat"
+              v-if="picked_delivery == 'delivery'"
           >
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Страна</label>
               <select
-                name="country_id"
-                id="js_select_country"
-                class="form-control"
-                @change="addProductToCart()"
+                  name="country_id"
+                  id="js_select_country"
+                  class="form-control"
+                  @change="addProductToCart()"
               >
                 <option value>-- Выберите страну --</option>
                 <option value="15">Азербайджан</option>
@@ -133,11 +154,11 @@
 
               <label>Регион</label>
               <select
-                name="zone_id"
-                id="js_select_zone"
-                class="form-control"
-                v-model="selectedReg"
-                @change="selectedRegion()"
+                  name="zone_id"
+                  id="js_select_zone"
+                  class="form-control"
+                  v-model="selectedReg"
+                  @change="selectedRegion()"
               >
                 <option value>--- Выберите ---</option>
                 <option value="2726">Алтайский край</option>
@@ -148,50 +169,51 @@
                 <option value="2730">Брянская область</option>
               </select>
               <label>Город</label>
-              <input type="text" name="city" value="Москва" class="js_localsave" />
+              <input type="text" name="city" value="Москва" class="js_localsave"/>
               <label>Улица, дом, квартира</label>
-              <VueDadata class="js_localsave" :token="token" />
+              <VueDadata class="js_localsave" :token="token"/>
               <label>Почтовый индекс</label>
-              <input type="text" name="postcode" value class="js_localsave" />
+              <input type="text" name="postcode" value class="js_localsave"/>
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной договорённости с менеджером.
+              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной договорённости с
+              менеджером.
             </p>
           </div>
 
           <div id="requisites" style="display: block;" v-if="picked == 'forUr'">
             <div class="gr_ttl">Реквизиты плательщика</div>
-            <input type="hidden" name="organization[empty]" />
+            <input type="hidden" name="organization[empty]"/>
             <div class="fields_wrap">
               <label>Юридический адрес</label>
               <input
-                type="text"
-                value
-                name="organization[address]"
-                data-required
-                class="js_localsave"
+                  type="text"
+                  value
+                  name="organization[address]"
+                  data-required
+                  class="js_localsave"
               />
               <label>Организация</label>
-              <input type="text" name="organization[name]" value data-required class="js_localsave" />
+              <input type="text" name="organization[name]" value data-required class="js_localsave"/>
               <label>ИНН/КПП</label>
               <input
-                type="text"
-                name="organization[inn_kpp]"
-                value
-                data-required
-                class="js_localsave"
+                  type="text"
+                  name="organization[inn_kpp]"
+                  value
+                  data-required
+                  class="js_localsave"
               />
               <label>Р/с</label>
-              <input type="text" name="organization[rs]" value data-required class="js_localsave" />
+              <input type="text" name="organization[rs]" value data-required class="js_localsave"/>
               <label>К/с</label>
-              <input type="text" name="organization[ks]" value data-required class="js_localsave" />
+              <input type="text" name="organization[ks]" value data-required class="js_localsave"/>
               <label>Банк</label>
-              <input type="text" name="organization[bank]" value data-required class="js_localsave" />
+              <input type="text" name="organization[bank]" value data-required class="js_localsave"/>
               <label>БИК</label>
-              <input type="text" name="organization[bik]" value data-required class="js_localsave" />
+              <input type="text" name="organization[bik]" value data-required class="js_localsave"/>
             </div>
           </div>
         </div>
@@ -218,7 +240,7 @@
               <div class="left_block">
                 <div class="order_total_label">
                   Итого к оплате
-                  <br />
+                  <br/>
                   <span>*Без учета стоимости доставки</span>
                 </div>
               </div>
@@ -230,7 +252,7 @@
               </div>
             </div>
           </div>
-          <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" />
+          <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ"/>
         </div>
       </div>
     </form>
@@ -238,11 +260,11 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import VueDadata from "vue-dadata";
 
 import ProductItem from "./ProductItem";
-import { log } from "util";
+
 function getXmlHttp() {
   let xmlhttp;
   try {
@@ -259,8 +281,10 @@ function getXmlHttp() {
   }
   return xmlhttp;
 }
+
 function makeAjax(metodType, path, body, callback) {
-  let getCallback = callback || function (data) {};
+  let getCallback = callback || function (data) {
+  };
   let xhr = getXmlHttp();
   xhr.open(metodType, path, true);
   xhr.onload = function () {
@@ -280,6 +304,7 @@ function makeAjax(metodType, path, body, callback) {
   xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
   xhr.send(body);
 }
+
 export default {
   data() {
     return {
@@ -288,6 +313,12 @@ export default {
       random: Math.floor(Math.random() * 100000),
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
       selectedReg: "",
+      // BeardedCode
+      categoryTotal: 0,
+      categoryProducts: [],
+      productToCategory: '',
+      productLimit: '',
+      // BeardedCode
     };
   },
   components: {
@@ -299,20 +330,36 @@ export default {
   },
 
   methods: {
+    // BeardedCode
+    // https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=122&limit=10
+    loadProducts() {
+      makeAjax('GET',
+          `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+          '',
+          (response) => {
+            this.categoryTotal = response.total ?? 0
+            this.categoryProducts = response.products ?? []
+          }
+      )
+    },
+    addProductToCart(product_id, options) {
+      console.log(product_id, options)
+    },
+    // BeardedCode
     ...mapActions("products", ["removeProduct"]),
     queryParams(params) {
       var esc = encodeURIComponent;
       var query = Object.keys(params)
-        .map((k) => {
-          if (params[k] instanceof Object) {
-            let innetObj = Object.keys(params[k])
-              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
-              .join("&");
-            return k + innetObj;
-          }
-          return `${esc(k)}=${esc(params[k])}`;
-        })
-        .join("&");
+          .map((k) => {
+            if (params[k] instanceof Object) {
+              let innetObj = Object.keys(params[k])
+                  .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+                  .join("&");
+              return k + innetObj;
+            }
+            return `${esc(k)}=${esc(params[k])}`;
+          })
+          .join("&");
       return query;
     },
 
@@ -324,8 +371,8 @@ export default {
         withCredentials: true,
         cache: "no-store",
       })
-        .then((response) => response.json())
-        .then((json) => console.log("че в json", json));
+          .then((response) => response.json())
+          .then((json) => console.log("че в json", json));
     },
 
     hasProduct() {
@@ -333,17 +380,17 @@ export default {
     },
     totalPrice() {
       return this.getProductsInCart.reduce(
-        (current, next) => current + next.price * next.qty,
-        0
+          (current, next) => current + next.price * next.qty,
+          0
       );
     },
 
     makeAjax(metodType, path, body, callback) {
       let getCallback =
-        callback ||
-        function (data) {
-          console.log("makeAjax");
-        };
+          callback ||
+          function (data) {
+            console.log("makeAjax");
+          };
       let xhr = this.getXmlHttp();
       xhr.open(metodType, path, true);
       xhr.onload = function () {
@@ -383,11 +430,27 @@ export default {
 };
 </script>
 <style lang="scss">
+/* BeardedCode */
+.products {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.product_card {
+  width: 25%;
+  outline: 1px solid #ddd;
+}
+.product_card img {
+  max-width: 100%;
+}
+/* BeardedCode */
 .wrapperCheckedProd {
   display: flex;
 }
+
 .vue-dadata {
   float: left !important;
+
   &__input {
     border: 1px solid #d6d5cc !important;
     border-radius: 3px !important;
@@ -397,12 +460,13 @@ export default {
     margin-bottom: 10px !important;
     width: 250px !important;
   }
+
   &__suggestions {
     border: 1px solid #888;
   }
 }
 </style>
-<style lang="scss" scoped >
+<style lang="scss" scoped>
 .checkout-box {
   width: 100%;
   max-width: 900px;
@@ -423,6 +487,7 @@ export default {
   align-self: flex-end;
   position: relative;
   padding-right: 38px;
+
   &::before {
     content: "РУБ";
     position: absolute;
@@ -450,6 +515,7 @@ export default {
 .order_block .right {
   width: 425px;
 }
+
 .right {
   float: right;
 }
@@ -461,6 +527,7 @@ export default {
   margin: 25px 0 15px;
   padding: 25px 5px 30px;
   position: relative;
+
   & .form-control {
     width: 100%;
   }
@@ -494,6 +561,7 @@ export default {
   text-align: right;
   width: 225px;
 }
+
 .left {
   float: left;
 }
@@ -553,6 +621,7 @@ export default {
   font-weight: 700;
   padding: 10px;
 }
+
 .order_block {
   font-size: 14px;
   margin-top: 20px;
@@ -576,6 +645,7 @@ export default {
 .order_block .fields_wrap {
   margin-bottom: 20px;
 }
+
 .fields_wrap label {
   float: left;
   line-height: 30px;
@@ -592,11 +662,13 @@ export default {
 .delivery_pickup_txt {
   color: #ff9e57;
   margin-bottom: 20px;
+
   & a {
     color: #ff9e57;
     text-decoration: underline;
   }
 }
+
 .form_border_style input[type="password"],
 .form_border_style input[type="text"],
 .form_border_style textarea,
@@ -611,15 +683,18 @@ export default {
 #requisites {
   display: none;
 }
+
 .orange {
   color: #ff9e24;
 }
+
 .gr_ttl {
   font-size: 20px;
   font-weight: 700;
   line-height: 24px;
   margin-bottom: 15px;
 }
+
 .form_border_style textarea {
   height: 110px;
   width: 100%;
@@ -640,6 +715,7 @@ export default {
   position: relative;
   outline: none !important;
 }
+
 /* создание в label псевдоэлемента before со следующими стилями */
 .custom-checkbox + label::before {
   content: "";
@@ -655,6 +731,7 @@ export default {
   background-position: center center;
   background-size: 50% 50%;
 }
+
 .custom-checkbox + label::after {
   content: "";
   display: inline-block;
@@ -673,6 +750,7 @@ export default {
   outline: 0;
   outline-offset: 0;
 }
+
 /* стили для чекбокса, находящегося в фокусе и не находящегося в состоянии checked */
 .custom-checkbox:focus:not(:checked) + label::before {
   border-color: #80bdff;
@@ -683,6 +761,7 @@ export default {
   border-color: #ff9e24;
   background-color: #fff;
 }
+
 .custom-checkbox:checked + label::after {
   opacity: 1;
 }
