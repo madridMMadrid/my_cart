@@ -16,6 +16,7 @@
         </div>
         <hr />
         <div>
+          <button @click="checkedProduct()">checked</button>
           <input type="text" v-model="productToCategory" placeholder="Category" />
           <input type="text" v-model="productLimit" placeholder="Limit" />
           <button @click.prevent="loadProducts()">Загрузить из категории</button>
@@ -23,11 +24,7 @@
         <hr />
       </div>
     </div>
-    <div class="wrapperCheckedProd">
-      <!-- <button @click="editProductToCart()">add</button> -->
-      <button @click="checkedProduct()">checked</button>
-      <button @click="remove()">DELETE</button>
-    </div>
+    <div class="wrapperCheckedProd"></div>
     <ul>
       <table class="resp-tab">
         <tbody>
@@ -191,7 +188,8 @@
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной договорённости с менеджером.
+              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной договорённости с
+              менеджером.
             </p>
           </div>
 
@@ -278,6 +276,7 @@
           <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
 
           <button class="button" @click="$v.$reset">$reset</button>
+          <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" />
         </div>
       </div>
     </form>
@@ -285,7 +284,7 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import VueDadata from "vue-dadata";
 import {
   required,
@@ -296,6 +295,46 @@ import {
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
+
+function getXmlHttp() {
+  let xmlhttp;
+  try {
+    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+  } catch (e) {
+    try {
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+    } catch (e) {
+      xmlhttp = false;
+    }
+  }
+  if (!xmlhttp && typeof XMLHttpRequest != "undefined") {
+    xmlhttp = new XMLHttpRequest();
+  }
+  return xmlhttp;
+}
+
+function makeAjax(metodType, path, body, callback) {
+  let getCallback = callback || function (data) {};
+  let xhr = getXmlHttp();
+  xhr.open(metodType, path, true);
+  xhr.onload = function () {
+    if (this.status == 200) {
+      let data;
+      try {
+        data = JSON.parse(this.responseText);
+      } catch (e) {
+        data = this.responseText;
+      }
+      getCallback(data);
+    } else {
+      alert("Error: " + this.status);
+    }
+  };
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+  xhr.send(body);
+}
+
 export default {
   data() {
     return {
@@ -329,6 +368,23 @@ export default {
     },
   },
   methods: {
+    // BeardedCode
+    // https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=122&limit=10
+    loadProducts() {
+      makeAjax(
+        "GET",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        "",
+        (response) => {
+          this.categoryTotal = response.total ?? 0;
+          this.categoryProducts = response.products ?? [];
+        }
+      );
+    },
+    addProductToCart(product_id, options) {
+      console.log(product_id, options);
+    },
+    // BeardedCode
     ...mapActions("products", ["removeProduct"]),
 
     loadProducts() {
@@ -503,8 +559,10 @@ export default {
 .wrapperCheckedProd {
   display: flex;
 }
+
 .vue-dadata {
   float: left !important;
+
   &__input {
     border: 1px solid #d6d5cc !important;
     border-radius: 3px !important;
@@ -514,12 +572,13 @@ export default {
     margin-bottom: 10px !important;
     width: 250px !important;
   }
+
   &__suggestions {
     border: 1px solid #888;
   }
 }
 </style>
-<style lang="scss" scoped >
+<style lang="scss" scoped>
 .checkout-box {
   width: 100%;
   max-width: 900px;
@@ -540,6 +599,7 @@ export default {
   align-self: flex-end;
   position: relative;
   padding-right: 38px;
+
   &::before {
     content: "РУБ";
     position: absolute;
@@ -567,6 +627,7 @@ export default {
 .order_block .right {
   width: 425px;
 }
+
 .right {
   float: right;
 }
@@ -578,6 +639,7 @@ export default {
   margin: 25px 0 15px;
   padding: 25px 5px 30px;
   position: relative;
+
   & .form-control {
     width: 100%;
   }
@@ -611,6 +673,7 @@ export default {
   text-align: right;
   width: 225px;
 }
+
 .left {
   float: left;
 }
@@ -670,6 +733,7 @@ export default {
   font-weight: 700;
   padding: 10px;
 }
+
 .order_block {
   font-size: 14px;
   margin-top: 20px;
@@ -693,6 +757,7 @@ export default {
 .order_block .fields_wrap {
   margin-bottom: 20px;
 }
+
 .fields_wrap label {
   float: left;
   line-height: 30px;
@@ -709,11 +774,13 @@ export default {
 .delivery_pickup_txt {
   color: #ff9e57;
   margin-bottom: 20px;
+
   & a {
     color: #ff9e57;
     text-decoration: underline;
   }
 }
+
 .form_border_style input[type="password"],
 .form_border_style input[type="text"],
 .form_border_style textarea,
@@ -728,15 +795,18 @@ export default {
 #requisites {
   display: none;
 }
+
 .orange {
   color: #ff9e24;
 }
+
 .gr_ttl {
   font-size: 20px;
   font-weight: 700;
   line-height: 24px;
   margin-bottom: 15px;
 }
+
 .form_border_style textarea {
   height: 110px;
   width: 100%;
@@ -757,6 +827,7 @@ export default {
   position: relative;
   outline: none !important;
 }
+
 /* создание в label псевдоэлемента before со следующими стилями */
 .custom-checkbox + label::before {
   content: "";
@@ -772,6 +843,7 @@ export default {
   background-position: center center;
   background-size: 50% 50%;
 }
+
 .custom-checkbox + label::after {
   content: "";
   display: inline-block;
@@ -790,6 +862,7 @@ export default {
   outline: 0;
   outline-offset: 0;
 }
+
 /* стили для чекбокса, находящегося в фокусе и не находящегося в состоянии checked */
 .custom-checkbox:focus:not(:checked) + label::before {
   border-color: #80bdff;
@@ -800,6 +873,7 @@ export default {
   border-color: #ff9e24;
   background-color: #fff;
 }
+
 .custom-checkbox:checked + label::after {
   opacity: 1;
 }
