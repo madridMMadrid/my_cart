@@ -8,20 +8,12 @@
     <ul>
       <table class="resp-tab">
         <tbody>
-          <!-- <CheckoutProductSumm
-            class="checkout-list"
-            v-for="(product, index) in getProductsInCart"
-            :key="product.id"
-            :index="index"
-            :getProductsInCart="product"
-          />-->
           <ProductItem
             class="checkout-list"
             v-for="(product, index) in gerRualProductInCart.products"
             :key="product.cart_id"
             :index="index"
             :getProductsInCart="product"
-            @ProductItemAdd="addProd"
           />
         </tbody>
       </table>
@@ -321,68 +313,6 @@ export default {
         })
         .join("&");
       return query;
-    },
-    // remove(id) {
-    //   let url =
-    //     "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
-    //   let data = { key: 50931 };
-
-    //   fetch(url, {
-    //     method: "POST",
-    //     withCredentials: true,
-    //     credentials: "include",
-    //     cache: "no-store",
-    //     headers: {
-    //       "Content-Type": "application/x-www-form-urlencoded",
-    //     },
-    //     body: this.queryParams(data),
-    //   })
-    //     .then((response) => response.json())
-    //     .then((json) => console.log("DELETE", json));
-    // },
-    addProd(payload) {
-      // console.log('получили из компонента', payload)
-      this.addProductToCart(payload)
-    },
-    addProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
-      var data = {
-        product_id: data.product_id,
-        quantity: 1,
-        option: data.option,
-      };
-
-      fetch(url, {
-        method: "POST",
-        credentials: "include",
-        withCredentials: true,
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: this.queryParams(data),
-      })
-        .then((response) => {
-          console.log("что то отправили", response, "че в дате", data);
-          if (!response.ok) {
-            return Promise.reject(
-              new Error(
-                "Response failed: " +
-                  response.status +
-                  " (" +
-                  response.statusText +
-                  ")"
-              )
-            );
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Делаем что-то с данными.", data);
-        })
-        .catch((error) => {
-          console.log("что то пошло не так", error);
-        });
     },
 
     checkedProduct() {

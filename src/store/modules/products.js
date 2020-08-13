@@ -220,7 +220,7 @@ export default {
             }
         },
         REMOVE_PRODUCT: (state, index) => {
-            state.cartProducts.splice(index, 1);
+            state.realproduct.products.splice(index, 1);
         },
         LOAD_ITEM: (state, product) => {
             state.realproduct = product
@@ -235,6 +235,7 @@ export default {
             state.showPopupCart = !state.showPopupCart;
         },
         PLUS_QTY: (state, payload) => {
+            console.log('отдаем сведения о товаре', payload)
             state.cartProducts.forEach((element, i) => {
                 if (element.productName == payload.productName && element.id == payload.id) {
                     state.cartProducts[i].qty += 1

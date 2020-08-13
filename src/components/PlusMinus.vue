@@ -2,16 +2,25 @@
   <div>
     <div class="product-card-buy-count d-flex ai-c">
       <div class="product-card-buy-count-controls">
-        <div class="less" @click="lessCaunt()"></div>
-        <input class="product-card-buy-count-input" v-model="summa" value="summa" />
-        <div class="more" @click="moreCaunt()"></div>
+        <div v-if="lessDisabled" class="less disabled"></div>
+        <div v-else class="less" @click="lessCaunt()"></div>
+        <input
+          type="number"
+          min="1"
+          class="product-card-buy-count-input"
+          @change="changeQty"
+          v-model="summa"
+          value="summa"
+        />
+        <div v-if="moreDisabled" class="more disabled"></div>
+        <div v-else class="more" @click="moreCaunt()"></div>
       </div>
     </div>
   </div>
 </template>
 <script>
 import { mapActions } from "vuex";
-import { log } from 'util';
+import { log } from "util";
 
 export default {
   props: ["price", "qty", "AllInfoForProduct"],
@@ -19,46 +28,131 @@ export default {
     return {
       summa: this.qty,
       totalSum: this.price,
+      product_id: this.AllInfoForProduct.product_id,
+      cart_id: this.AllInfoForProduct.cart_id,
+      one: this.AllInfoForProduct.option[0].product_option_id,
+      two: this.AllInfoForProduct.option[0].product_option_value_id,
+      moreDisabled: false,
+      lessDisabled: false,
     };
   },
   watch: {
-    price() {
-      this.totalSum = this.price * this.summa;
+    summa(e) {
+      this.summa = +e;
+      this.$emit("emitQty", this.summa);
     },
+  },
+  created() {
+    this.$emit("emitQty", this.summa);
   },
   methods: {
     ...mapActions("products", ["plusQty", "minusQty"]),
+    changeQty(e) {
+      if (e.target.value <= 0) {
+        this.summa = 1;
+      }
+    },
+    queryParams(params) {
+      var esc = encodeURIComponent;
+      var query = Object.keys(params)
+        .map((k) => {
+          if (params[k] instanceof Object) {
+            let innetObj = Object.keys(params[k])
+              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+              .join("&");
+            return k + innetObj;
+          }
+          return `${esc(k)}=${esc(params[k])}`;
+        })
+        .join("&");
+      return query;
+    },
+    editProductToCart(data) {
+      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/edit";
+      var data = {
+        product_id: data.product_id,
+        quantity: data.qty,
+        cart_id: data.cart_id,
+        option: data.option,
+      };
+      this.moreDisabled = true;
+      fetch(url, {
+        method: "POST",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
+      })
+        .then((response) => {
+          console.log("что то отправили", response, "че в дате", data);
+          if (!response.ok) {
+            return Promise.reject(
+              new Error(
+                "Response failed: " +
+                  response.status +
+                  " (" +
+                  response.statusText +
+                  ")"
+              )
+            );
+          }
+          return response.json();
+        })
+        .then((data) => {
+          this.moreDisabled = false;
+          if (data.inerator == 1) {
+            this.plusQty(this.AllInfoForProduct);
+          } else {
+            this.minusQty(this.AllInfoForProduct);
+          }
+          console.log("Делаем что-то с данными.", data);
+        })
+        .catch((error) => {
+          console.log("что то пошло не так", error);
+        });
+    },
 
     moreCaunt() {
       this.summa += 1;
       this.totalSum += this.price;
-      this.$emit("backSumm", {
-        sum: this.summa,
+      let obj = {};
+      obj[+this.one] = +this.two;
+      this.editProductToCart({
+        product_id: this.product_id,
+        cart_id: this.cart_id,
+        qty: this.summa,
+        option: obj,
+        inerator: 1,
       });
-      this.$emit("totalCurrentSummMore", {
-        total: this.totalSum,
-      });
-      this.plusQty(this.AllInfoForProduct);
     },
     lessCaunt() {
-      console.log('plusMinus')
       if (this.summa <= 1) {
         return;
       }
       this.summa -= 1;
       this.totalSum -= this.price;
-      this.$emit("backSumm", {
-        sum: this.summa,
+      let obj = {};
+      obj[+this.one] = +this.two;
+      this.editProductToCart({
+        product_id: this.product_id,
+        cart_id: this.cart_id,
+        qty: this.summa,
+        option: obj,
+        inerator: 0,
       });
-      this.$emit("totalCurrentSummLess", {
-        total: this.totalSum,
-      });
-      this.minusQty(this.AllInfoForProduct);
     },
   },
 };
 </script>
 <style lang="scss" scoped>
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 .product-card-buy {
   &-count {
     margin: 0;
@@ -89,11 +183,17 @@ export default {
         }
       }
       & .more {
+        &.disabled {
+          cursor: not-allowed;
+        }
         &:before {
           content: "+";
         }
       }
       & .less {
+        &.disabled {
+          cursor: not-allowed;
+        }
         &:before {
           content: "-";
         }

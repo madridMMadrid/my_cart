@@ -25,7 +25,7 @@
           <li class="char_list_material" v-if="getProductsInCart.option">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
             <div>
-              <select v-model="selected">
+              <select v-model="selected" placeholder="введите несколько строчек">
                 <option v-for="(val, i) in options" :key="i">{{ val.name }}</option>
               </select>
             </div>
@@ -45,11 +45,10 @@
     </td>
     <td>
       <PlusMinus
-        @totalCurrentSummMore="totalSummMore"
-        @totalCurrentSummLess="totalSummLess"
         :price="getProductsInCart.price"
         :qty="+getProductsInCart.quantity"
         :AllInfoForProduct="getProductsInCart"
+        @emitQty="sumQty"
       />
     </td>
     <td>
@@ -73,18 +72,24 @@ export default {
   data() {
     return {
       totalCurrenSumm: 0,
-      changeSelect: this.getProductsInCart.selected,
+      product_id: this.getProductsInCart.product_id,
       options: this.getProductsInCart.option[0].product_option_value,
       selected: this.getProductsInCart.option[0].product_option_value[0].name,
-      one: this.getProductsInCart.option[0].product_option_id,
-      two: this.getProductsInCart.option[0].product_option_value_id
+      selectValue: null,
+      qty: 0,
 
+      cart_id: this.getProductsInCart.cart_id,
+      one: this.getProductsInCart.option[0].product_option_id,
+      two: this.getProductsInCart.option[0].product_option_value_id,
     };
   },
+  computed: {},
   methods: {
-    ...mapActions("products", ["removeProduct", "changeCoff"]),
+    ...mapActions("products", ["removeProduct"]),
+    sumQty(e) {
+      this.qty = e;
+    },
     queryParams(params) {
-      //   this.removeProduct(index);
       var esc = encodeURIComponent;
       var query = Object.keys(params)
         .map((k) => {
@@ -98,6 +103,46 @@ export default {
         })
         .join("&");
       return query;
+    },
+    editProductToCart(data) {
+      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/edit";
+      var data = {
+        product_id: data.product_id,
+        quantity: data.qty,
+        cart_id: data.cart_id,
+        option: data.option,
+      };
+      fetch(url, {
+        method: "POST",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
+      })
+        .then((response) => {
+          console.log("что то отправили", response, "че в дате", data);
+          if (!response.ok) {
+            return Promise.reject(
+              new Error(
+                "Response failed: " +
+                  response.status +
+                  " (" +
+                  response.statusText +
+                  ")"
+              )
+            );
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Делаем что-то с данными.", data);
+        })
+        .catch((error) => {
+          console.log("что то пошло не так", error);
+        });
     },
     remove(id) {
       let url =
@@ -114,28 +159,33 @@ export default {
         },
         body: this.queryParams(data),
       })
-        .then((response) => response.json())
+        .then((response) => {
+          console.log(this.index);
+          this.removeProduct(this.index);
+          response.json();
+        })
         .then((json) => console.log("DELETE", json));
-    },
-    totalSummMore(data) {
-      let obj = {};
-      obj[+this.one] = +this.two
-      this.$emit("ProductItemAdd", {
-        product_id: this.getProductsInCart.product_id,
-        quantity: this.getProductsInCart.quantity,
-        option: obj,
-      });
-
-      this.totalCurrenSumm = data;
-    },
-    totalSummLess(data) {
-      // this.totalCurrenSumm = data;
     },
   },
   watch: {
-    changeSelect(val) {
-      let infoForProduct = { a: this.getProductsInCart, b: val };
-      this.changeCoff(infoForProduct);
+    selected(e) {
+      let searchTerm = e;
+      let option_value_id = this.options.find(
+        (name) => name.name === searchTerm
+      ).option_value_id;
+      let product_option_value_id = this.options.find(
+        (name) => name.name === searchTerm
+      ).product_option_value_id;
+      let obj = {};
+      obj[option_value_id] = +product_option_value_id;
+      this.selectValue = obj;
+      this.editProductToCart({
+        product_id: this.product_id,
+        cart_id: this.cart_id,
+        qty: this.qty,
+        option: obj,
+        inerator: 0,
+      });
     },
   },
 };
