@@ -1,7 +1,7 @@
 <template>
   <div class="checkout-box">
     <div class="wrapperCheckedProd">
-      <button @click="addProductToCart()">add</button>
+      <button @click="editProductToCart()">add</button>
       <button @click="checkedProduct()">checked</button>
       <button @click="remove()">DELETE</button>
     </div>
@@ -314,6 +314,47 @@ export default {
         })
         .join("&");
       return query;
+    },
+    editProductToCart(data) {
+      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
+      var data = {
+        product_id: 1513,
+        quantity: 1,
+        cart_id: 51808,
+        option: {796: 2858},
+      };
+      this.moreDisabled = true;
+      fetch(url, {
+        method: "POST",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: this.queryParams(data),
+      })
+        .then((response) => {
+          console.log("что то отправили", response, "че в дате", data);
+          if (!response.ok) {
+            return Promise.reject(
+              new Error(
+                "Response failed: " +
+                  response.status +
+                  " (" +
+                  response.statusText +
+                  ")"
+              )
+            );
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Делаем что-то с данными.", data);
+        })
+        .catch((error) => {
+          console.log("что то пошло не так", error);
+        });
     },
 
     checkedProduct() {
