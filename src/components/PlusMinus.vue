@@ -10,7 +10,9 @@
           type="number"
           min="1"
           class="product-card-buy-count-input"
-          @change="changeQty"
+          @change="addEvent"
+          @input="addEventChange"
+          @keyup.enter="addEvent"
           v-model="summa"
           value="summa"
         />
@@ -25,8 +27,7 @@
 <script>
 import { mapActions } from "vuex";
 import { log } from "util";
-import { store } from '../store';
-
+import { store } from "../store";
 
 export default {
   props: ["price", "qty", "AllInfoForProduct"],
@@ -57,10 +58,18 @@ export default {
   },
   methods: {
     ...mapActions("products", ["plusQty", "minusQty"]),
-    changeQty(e) {
-      if (e.target.value <= 0) {
-        this.summa = 1;
-      }
+    addEvent({ type, target }) {
+      let obj = {};
+      obj[+this.one] = +this.two;
+      this.editProductToCart({
+        product_id: this.product_id,
+        cart_id: this.cart_id,
+        qty: target.value,
+        option: obj,
+      });
+    },
+    addEventChange({ type, target }) {
+      console.log("addEventChange", target.value);
     },
     queryParams(params) {
       var esc = encodeURIComponent;
@@ -84,9 +93,11 @@ export default {
         quantity: data.qty,
         cart_id: data.cart_id,
         option: data.option,
-        inerator: data.inerator
+        inerator: data.inerator,
       };
-      data.inerator == 1 ? this.moreDisabled = true : this.lessDisabled = true
+      data.inerator == 1
+        ? (this.moreDisabled = true)
+        : (this.lessDisabled = true);
       fetch(url, {
         method: "POST",
         credentials: "include",
@@ -120,7 +131,7 @@ export default {
             this.lessDisabled = false;
             this.minusQty(this.AllInfoForProduct);
           }
-          store.dispatch('products/loadItems');
+          store.dispatch("products/loadItems");
           console.log("Делаем что-то с данными.", res);
         })
         .catch((error) => {

@@ -294,8 +294,6 @@
                     <p class="typo__p" v-if="submitStatus === 'OK'">Thanks for your submission!</p>
                     <p class="typo__p" v-if="submitStatus === 'ERROR'">Please fill the form correctly.</p>
                     <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
-
-                    <button class="button" @click="$v.$reset">$reset</button>
                 </div>
             </div>
         </form>
