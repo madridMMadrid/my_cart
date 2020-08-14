@@ -296,7 +296,6 @@
                     <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
 
                     <button class="button" @click="$v.$reset">$reset</button>
-                    <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ"/>
                 </div>
             </div>
         </form>

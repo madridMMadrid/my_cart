@@ -25,6 +25,8 @@
 <script>
 import { mapActions } from "vuex";
 import { log } from "util";
+import { store } from '../store';
+
 
 export default {
   props: ["price", "qty", "AllInfoForProduct"],
@@ -118,6 +120,7 @@ export default {
             this.lessDisabled = false;
             this.minusQty(this.AllInfoForProduct);
           }
+          store.dispatch('products/loadItems');
           console.log("Делаем что-то с данными.", res);
         })
         .catch((error) => {

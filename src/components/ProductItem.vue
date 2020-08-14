@@ -25,8 +25,8 @@
           <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
             <div>
-              <select v-model="selected" placeholder="введите несколько строчек">
-                <option v-for="(val, i) in options" :key="i">{{ val.name }}</option>
+              <select v-model="selected" >
+                <option v-for="(val, i) in options" :value="val.product_option_value_id" :key="i">{{ val.name }}</option>
               </select>
             </div>
           </li>
@@ -40,7 +40,7 @@
     </td>
     <td>
       <div class="currentSum">
-        <div>{{ getProductsInCart.total }}</div>
+        <div>{{ getProductsInCart.price }}</div>
       </div>
     </td>
     <td>
@@ -52,7 +52,7 @@
       />
     </td>
     <td>
-      <span class="product-price">{{ getProductsInCart.price }}</span>
+      <span class="product-price">{{ getProductsInCart.total }}</span>
     </td>
     <td>
       <button class="product-remove" @click="remove(getProductsInCart.cart_id)">X</button>
@@ -64,6 +64,8 @@ import { mapActions } from "vuex";
 
 import PlusMinus from "./PlusMinus";
 import { log } from "util";
+import { store } from '../store';
+
 export default {
   props: ["getProductsInCart", "index"],
   components: {
@@ -78,7 +80,7 @@ export default {
         this.getProductsInCart.option[0].product_option_value,
       selected:
         this.getProductsInCart.option.length == 0 ||
-        this.getProductsInCart.option[0].product_option_value[0].name,
+        this.getProductsInCart.option[0].product_option_value[0].product_option_value_id,
       selectValue: null,
       qty: 0,
 
@@ -147,6 +149,7 @@ export default {
           return response.json();
         })
         .then((data) => {
+          store.dispatch('products/loadItems');
           console.log("Делаем что-то с данными.", data);
         })
         .catch((error) => {
@@ -169,9 +172,11 @@ export default {
         body: this.queryParams(data),
       })
         .then((response) => {
-          console.log(this.index);
+          
           this.removeProduct(this.index);
           response.json();
+          store.dispatch('products/loadItems');
+
         })
         .then((json) => console.log("DELETE", json));
     },
@@ -179,14 +184,15 @@ export default {
   watch: {
     selected(e) {
       let searchTerm = e;
-      let option_value_id = this.options.find(
-        (name) => name.name === searchTerm
-      ).option_value_id;
-      let product_option_value_id = this.options.find(
-        (name) => name.name === searchTerm
-      ).product_option_value_id;
+      console.log("че выбрал", searchTerm)
+      // let option_value_id = this.options.find(
+      //   (name) => name.name === searchTerm
+      // ).option_value_id;
+      // let product_option_value_id = this.options.find(
+      //   (name) => name.name === searchTerm
+      // ).product_option_value_id;
       let obj = {};
-      obj[option_value_id] = +product_option_value_id;
+      obj[+this.one] = +searchTerm;
       this.selectValue = obj;
       this.editProductToCart({
         product_id: this.product_id,
@@ -317,8 +323,8 @@ tr {
   }
 }
 .product-image {
-  grid-column: 1/2;
-  max-height: 115px;
+  max-height: 100px;
+  max-width: 100px;
 }
 
 .product-name {
