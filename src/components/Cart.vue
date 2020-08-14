@@ -591,6 +591,7 @@ export default {
 
 .checkout-list {
   padding: 0;
+  
 }
 
 .total {

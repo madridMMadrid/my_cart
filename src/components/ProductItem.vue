@@ -1,5 +1,5 @@
 <template>
-  <tr>
+  <tr class="wrapper_list spinner">
     <td>
       <img :src="getProductsInCart.thumb" alt class="product-image" />
     </td>
@@ -73,21 +73,26 @@ export default {
     return {
       totalCurrenSumm: 0,
       product_id: this.getProductsInCart.product_id,
-      options: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value,
-      selected: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value[0].name,
+      options:
+        this.getProductsInCart.option.length == 0 ||
+        this.getProductsInCart.option[0].product_option_value,
+      selected:
+        this.getProductsInCart.option.length == 0 ||
+        this.getProductsInCart.option[0].product_option_value[0].name,
       selectValue: null,
       qty: 0,
 
       cart_id: this.getProductsInCart.cart_id,
-      one: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_id,
-      two: this.getProductsInCart.option.length == 0 || this.getProductsInCart.option[0].product_option_value_id,
+      one:
+        this.getProductsInCart.option.length == 0 ||
+        this.getProductsInCart.option[0].product_option_id,
+      two:
+        this.getProductsInCart.option.length == 0 ||
+        this.getProductsInCart.option[0].product_option_value_id,
     };
   },
-  created() {
-  },
-  computed: {
-
-  },
+  created() {},
+  computed: {},
   methods: {
     ...mapActions("products", ["removeProduct"]),
     sumQty(e) {
@@ -300,6 +305,16 @@ tr {
 
 .checkout-product * {
   place-self: center;
+}
+.wrapper_list {
+  & .spinner {
+    position: relative;
+    & .in_spinner {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
 }
 .product-image {
   grid-column: 1/2;

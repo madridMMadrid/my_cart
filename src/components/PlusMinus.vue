@@ -84,12 +84,7 @@ export default {
         option: data.option,
         inerator: data.inerator
       };
-      console.log('че в итераторе', data.inerator)
-      if (data.inerator == 1) {
-        this.moreDisabled = true;
-      } else {
-        this.lessDisabled = true;
-      }
+      data.inerator == 1 ? this.moreDisabled = true : this.lessDisabled = true
       fetch(url, {
         method: "POST",
         credentials: "include",
