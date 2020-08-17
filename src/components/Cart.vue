@@ -91,7 +91,7 @@
         </div>
 
         <div class="left">
-          <div class="gr_ttl">Контактная информация</div>
+          <div class="gr_ttl" id="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
             <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
               <label class="form__label">
@@ -281,9 +281,9 @@
             type="submit"
             :disabled="submitStatus === 'PENDING'"
           >ОТПРАВИТЬ</button>
-          <p class="typo__p" v-if="submitStatus === 'OK'">Thanks for your submission!</p>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">Please fill the form correctly.</p>
-          <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
+          <p class="typo__p" v-if="submitStatus === 'OK'">Спасибо за заявку!</p>
+          <p class="typo__p" v-if="submitStatus === 'ERROR'">Пожалуйста, введите корректные данные</p>
+          <p class="typo__p" v-if="submitStatus === 'PENDING'">Отправляем...</p>
         </div>
       </div>
     </form>
@@ -455,12 +455,12 @@ export default {
     submit() {
       this.$v.$touch();
       // this.isEmailValid();
-      console.log('что выдает валидация', this.isEmailValid())
+      console.log("что выдает валидация", this.isEmailValid());
       if (
         this.$v.$invalid ||
         this.isEmailValid() == "" ||
-        this.isEmailValid() == false || 
-        this.isEmailValid() !== 'has-success'
+        this.isEmailValid() == false ||
+        this.isEmailValid() !== "has-success"
       ) {
         if (this.isEmailValid() == "") {
           this.emptyEmail = true;
@@ -636,7 +636,11 @@ body {
 
 .vue-dadata {
   float: left !important;
-
+  &__search {
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
+  }
   &__input {
     border: 1px solid #d6d5cc !important;
     border-radius: 3px !important;
@@ -645,9 +649,15 @@ body {
     font-size: 14px !important;
     margin-bottom: 10px !important;
     width: 250px;
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
   }
   &__container {
     width: 250px !important;
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
   }
 
   &__suggestions {
@@ -1048,6 +1058,19 @@ input {
   }
 }
 @media screen and (max-width: 600px) {
+  .form-control,
+  .js_localsave {
+    width: 100%;
+    & .vue-dadata__search {
+      width: 100%;
+    }
+    & .vue-dadata__input {
+      width: 100% !important;
+    }
+    & .vue-dadata__container {
+      width: 100% !important;
+    }
+  }
   .order_block {
     & .right {
       width: 100%;
@@ -1063,19 +1086,6 @@ input {
         input {
           width: 100%;
           margin: 0;
-        }
-        & .form-control,
-        .js_localsave {
-          width: 100%;
-          & .vue-dadata__search {
-            width: 100%;
-          }
-          & .vue-dadata__input {
-            width: 100% !important;
-          }
-          & .vue-dadata__container {
-            width: 100% !important;
-          }
         }
       }
     }
