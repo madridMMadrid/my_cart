@@ -36,7 +36,7 @@
       </div>
     </div>
     <div class="wrapperCheckedProd"></div>
-    <ul>
+    <ul class="p-0">
       <table class="resp-tab">
         <tbody>
           <ProductItem
@@ -110,17 +110,28 @@
               v-if="!$v.fio.maxLength"
             >Больше {{$v.fio.$params.maxLength.max}} символов.</div>
 
-            <label>
-              Номер телефона
-              <span class="orange">*</span>
-            </label>
-            <input type="text" name="telephone" value class="phone_mask js_localsave" data-required />
+            <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
+              <label class="form__label">
+                Номер телефона
+                <span class="orange">*</span>
+              </label>
+              <input class="form__input" v-mask="'+7(###) ###-##-##'" v-model="$v.phone.$model" />
+            </div>
+            <div class="error" v-if="!$v.phone.required">Телефон пуст</div>
+            <div
+              class="error"
+              v-if="!$v.phone.minLength"
+            >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
 
-            <label>
-              E-mail
-              <span class="orange">*</span>
-            </label>
-            <input type="text" name="email" value data-required class="js_localsave" />
+            <div class="form-group" :class="[{'form-group--error': emptyEmail}, isEmailValid()]">
+              <label class="form__label">
+                Email
+                <span class="orange">*</span>
+              </label>
+              <input class="form__input" v-model="email" />
+            </div>
+            <div class="error" v-if="email">Не коректный Email</div>
+            <div class="error" v-else-if="emptyEmail">Пустой Email</div>
           </div>
 
           <div class="gr_ttl">Способ доставки</div>
@@ -158,38 +169,19 @@
           >
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
-              <label>Страна</label>
-              <select
-                name="country_id"
-                id="js_select_country"
-                class="form-control"
-                @change="addProductToCart()"
-              >
-                <option value>-- Выберите страну --</option>
-                <option value="15">Азербайджан</option>
-                <option value="11">Армения</option>
-                <option value="140">Молдова</option>
-                <option value="176" selected="selected">Российская Федерация</option>
-              </select>
-
               <label>Регион</label>
+              <!-- <select v-model="selected" >
+                <option v-for="(val, i) in options" :value="val.product_option_value_id" :key="i">{{ val.name }}</option>
+              </select>-->
               <select
                 name="zone_id"
                 id="js_select_zone"
                 class="form-control"
-                v-model="selectedReg"
-                @change="selectedRegion()"
+                v-model="selectedRegion"
               >
-                <option value>--- Выберите ---</option>
-                <option value="2726">Алтайский край</option>
-                <option value="2729">Амурская область</option>
-                <option value="2724">Архангельская область</option>
-                <option value="2725">Астраханская область</option>
-                <option value="2727">Белгородская область</option>
-                <option value="2730">Брянская область</option>
+                <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
               </select>
-              <label>Город</label>
-              <input type="text" name="city" value="Москва" class="js_localsave" />
+
               <label>Улица, дом, квартира</label>
               <VueDadata class="js_localsave" :token="token" />
               <label>Почтовый индекс</label>
@@ -277,7 +269,6 @@
               </div>
             </div>
           </div>
-          <!-- <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" /> -->
           <button
             class="button orange_btn btn_big"
             type="submit"
@@ -352,8 +343,11 @@ export default {
       picked_delivery: "delivery",
       random: Math.floor(Math.random() * 100000),
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
-      selectedReg: "",
+      selectedRegion: "",
+      selectedCity: "",
+      regions: "",
       fio: "",
+      phone: "",
       age: 0,
       submitStatus: null,
 
@@ -362,6 +356,12 @@ export default {
       productToCategory: "",
       productLimit: "",
       selectOptions: {},
+
+      emptyEmail: false,
+
+      email: "",
+      reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+      testEmail: false
     };
   },
   components: {
@@ -377,13 +377,56 @@ export default {
       minLength: minLength(3),
       maxLength: maxLength(32),
     },
+    phone: {
+      required,
+      minLength: minLength(17),
+    },
+    email: {
+      required,
+    },
+  },
+  created() {
+    this.getRegions();
   },
   methods: {
+    isEmailValid () {
+      return this.email == ""
+        ? this.emtyFunEmail()
+        : this.reg.test(this.email)
+        ? this.testEmail = true
+        : this.test()
+    },
+    emtyFunEmail() {
+      this.emptyEmail = true
+    },
+    test() {
+      this.testEmai = true
+      this.emptyEmail = true
+      return "form-group--error" 
+    },
+    selectedCityChange() {
+      console.log("selectedCityChange");
+    },
+    getRegions() {
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/regions";
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          console.log(json.zones);
+          this.selectedRegion = json.zone_id;
+          this.regions = json.zones;
+        });
+    },
     // BeardedCode
     optionsPush(productId, option) {
       this.selectOptions[productId] = option;
     },
-    // https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=122&limit=10
     loadProducts() {
       makeAjax(
         "GET",
@@ -412,12 +455,11 @@ export default {
     // BeardedCode
     ...mapActions("products", ["removeProduct"]),
     submit() {
-      console.log("submit!");
       this.$v.$touch();
-      if (this.$v.$invalid) {
+      if (this.$v.$invalid && !this.reg.test(this.email) && !this.emptyEmail) {
         this.submitStatus = "ERROR";
       } else {
-        // do your submit logic here
+        this.emptyEmail = false
         this.submitStatus = "PENDING";
         setTimeout(() => {
           this.submitStatus = "OK";
@@ -554,10 +596,20 @@ export default {
 };
 </script>
 <style lang="scss">
+html,
+body {
+  width: 100%;
+  display: table;
+}
+#js_form_order {
+  // display: none; //временно
+}
 /* BeardedCode */
 .products {
   display: flex;
   flex-wrap: wrap;
+
+  display: none; //временно
 }
 
 .product_card {
@@ -972,5 +1024,53 @@ input {
 .form-group--error + .error {
   display: block;
   color: #f57f6c;
+}
+@media screen and (max-width: 900px) {
+  .order_block {
+    & .right {
+      float: left;
+      width: 100%;
+    }
+  }
+}
+@media screen and (max-width: 600px) {
+  .order_block {
+    & .right {
+      width: 100%;
+    }
+    & .left {
+      width: 100%;
+      & .fields_wrap {
+        & .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+        & label,
+        input {
+          width: 100%;
+          margin: 0;
+        }
+        & .form-control,
+        .js_localsave {
+          width: 100%;
+          & .vue-dadata__search {
+            width: 100%;
+          }
+          & .vue-dadata__input {
+            width: 100% !important;
+          }
+        }
+      }
+    }
+    & .order_info {
+      & .left_block,
+      .right_block {
+        width: 100%;
+        padding: 0 5px;
+        text-align: center;
+        border: none;
+      }
+    }
+  }
 }
 </style>
