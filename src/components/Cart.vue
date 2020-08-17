@@ -63,7 +63,7 @@
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
-        <div class="entity_wrap entity_wrap_l">
+        <div class="entity_wrap">
           <div class="checkbox">
             <input
               class="custom-checkbox"
@@ -123,7 +123,14 @@
               v-if="!$v.phone.minLength"
             >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
 
-            <div class="form-group" :class="[{'form-group--error': emptyEmail}, isEmailValid()]">
+            <!-- <label>
+              E-mail
+              <span class="orange">*</span>
+            </label>-->
+            <!-- <input  type="email" required name="email" value data-required class="js_localsave" /> -->
+            <!-- <input type="text" v-mask="mask" v-model="emptyEmailEmail" placeholder="00:00-23:59" /> -->
+
+            <div class="form-group" :class="[{'form-group--error' : emptyEmail}, isEmailValid()]">
               <label class="form__label">
                 Email
                 <span class="orange">*</span>
@@ -131,7 +138,7 @@
               <input class="form__input" v-model="email" />
             </div>
             <div class="error" v-if="email">Не коректный Email</div>
-            <div class="error" v-else-if="emptyEmail">Пустой Email</div>
+            <div class="error" v-else-if="emptyEmail">Email пустой</div>
           </div>
 
           <div class="gr_ttl">Способ доставки</div>
@@ -357,11 +364,9 @@ export default {
       productLimit: "",
       selectOptions: {},
 
-      emptyEmail: false,
-
       email: "",
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
-      testEmail: false
+      emptyEmail: false,
     };
   },
   components: {
@@ -389,20 +394,13 @@ export default {
     this.getRegions();
   },
   methods: {
-    isEmailValid () {
+    isEmailValid: function () {
+      if (this.email != "") this.emptyEmail = false;
       return this.email == ""
-        ? this.emtyFunEmail()
+        ? ""
         : this.reg.test(this.email)
-        ? this.testEmail = true
-        : this.test()
-    },
-    emtyFunEmail() {
-      this.emptyEmail = true
-    },
-    test() {
-      this.testEmai = true
-      this.emptyEmail = true
-      return "form-group--error" 
+        ? "has-success"
+        : "form-group--error";
     },
     selectedCityChange() {
       console.log("selectedCityChange");
@@ -418,7 +416,7 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => {
-          console.log(json.zones);
+          // console.log(json.zones);
           this.selectedRegion = json.zone_id;
           this.regions = json.zones;
         });
@@ -456,10 +454,20 @@ export default {
     ...mapActions("products", ["removeProduct"]),
     submit() {
       this.$v.$touch();
-      if (this.$v.$invalid && !this.reg.test(this.email) && !this.emptyEmail) {
+      // this.isEmailValid();
+      console.log('что выдает валидация', this.isEmailValid())
+      if (
+        this.$v.$invalid ||
+        this.isEmailValid() == "" ||
+        this.isEmailValid() == false || 
+        this.isEmailValid() !== 'has-success'
+      ) {
+        if (this.isEmailValid() == "") {
+          this.emptyEmail = true;
+        }
         this.submitStatus = "ERROR";
       } else {
-        this.emptyEmail = false
+        this.emptyEmail = false;
         this.submitStatus = "PENDING";
         setTimeout(() => {
           this.submitStatus = "OK";
@@ -636,6 +644,9 @@ body {
     padding: 5px 10px !important;
     font-size: 14px !important;
     margin-bottom: 10px !important;
+    width: 250px;
+  }
+  &__container {
     width: 250px !important;
   }
 
@@ -813,6 +824,9 @@ body {
 .order_block .entity_wrap {
   margin: 20px 0;
   display: flex;
+  & input {
+    width: auto;
+  }
 }
 
 .entity_wrap label {
@@ -1057,6 +1071,9 @@ input {
             width: 100%;
           }
           & .vue-dadata__input {
+            width: 100% !important;
+          }
+          & .vue-dadata__container {
             width: 100% !important;
           }
         }
