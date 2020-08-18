@@ -185,7 +185,7 @@
                 id="js_select_zone"
                 class="form-control"
                 v-model="selectedRegion"
-                @change="selectRegion()"
+                @change="selectRegion"
               >
                 <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
               </select>
@@ -305,7 +305,6 @@ import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
 
-
 function getXmlHttp() {
   let xmlhttp;
   try {
@@ -400,11 +399,14 @@ export default {
     scrollToRef(refName) {
       var element = this.$refs[refName];
       var top = element.offsetTop;
-      window.scrollTo(0, top);
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
     },
-    selectRegion() {
-      let url =
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${this.selectedRegion}`;
+    selectRegion({ target }) {
+      console.log("смена региона", target.value);
+      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${target.value}`;
       var data = {
         zone_id: this.selectedRegion, // выбранный регион
       };
@@ -417,8 +419,7 @@ export default {
         .then((response) => response.json())
         .then((json) => {
           store.dispatch("products/loadItems");
-          console.log("selectedRegion", this.selectedRegion);
-          console.log("changeRegion получаем регион", json);
+          console.log(json);
         });
     },
     isEmailValid: function () {
@@ -443,7 +444,6 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => {
-          console.log(json.zones)
           this.selectedRegion = json.zone_id;
           this.regions = json.zones;
         });
@@ -481,8 +481,6 @@ export default {
     ...mapActions("products", ["removeProduct"]),
     submit() {
       this.$v.$touch();
-      // this.isEmailValid();
-      console.log("что выдает валидация", this.isEmailValid());
       if (
         this.$v.$invalid ||
         this.isEmailValid() == "" ||
