@@ -495,7 +495,7 @@ export default {
       let getCallback = callback || function (data) {};
       let xhr = this.getXmlHttp();
       xhr.open(metodType, path, true);
-      xhr.onload = function () {
+      xhr.onload = () => {
         if (this.status == 200) {
           let data;
           try {
@@ -503,6 +503,7 @@ export default {
           } catch (e) {
             data = this.responseText;
           }
+          console.log('чет не так', data)
           getCallback(data);
         } else {
           alert("Error: " + this.status);
@@ -510,6 +511,7 @@ export default {
       };
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+      xhr.setRequestHeader("'Access-Control-Allow-Origin'", "*");
       xhr.withCredentials = true;
       xhr.send(body);
     },
