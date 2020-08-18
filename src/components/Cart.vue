@@ -407,9 +407,6 @@ export default {
     selectRegion({ target }) {
       console.log("смена региона", target.value);
       let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${target.value}`;
-      var data = {
-        zone_id: this.selectedRegion, // выбранный регион
-      };
       fetch(url, {
         method: "GET",
         credentials: "include",
