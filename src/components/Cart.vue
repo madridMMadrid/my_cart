@@ -305,45 +305,6 @@ import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
 
-function getXmlHttp() {
-  let xmlhttp;
-  try {
-    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-  } catch (e) {
-    try {
-      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    } catch (e) {
-      xmlhttp = false;
-    }
-  }
-  if (!xmlhttp && typeof XMLHttpRequest != "undefined") {
-    xmlhttp = new XMLHttpRequest();
-  }
-  return xmlhttp;
-}
-
-function makeAjax(metodType, path, body, callback) {
-  let getCallback = callback || function (data) {};
-  let xhr = getXmlHttp();
-  xhr.open(metodType, path, true);
-  xhr.onload = function () {
-    if (this.status == 200) {
-      let data;
-      try {
-        data = JSON.parse(this.responseText);
-      } catch (e) {
-        data = this.responseText;
-      }
-      getCallback(data);
-    } else {
-      alert("Error: " + this.status);
-    }
-  };
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-  xhr.withCredentials = true;
-  xhr.send(body);
-}
 
 export default {
   data() {
@@ -357,7 +318,6 @@ export default {
       regions: "",
       fio: "",
       phone: "",
-      age: 0,
       submitStatus: null,
 
       categoryTotal: 0,
@@ -427,9 +387,6 @@ export default {
         ? "has-success"
         : "form-group--error";
     },
-    selectedCityChange() {
-      console.log("selectedCityChange");
-    },
     getRegions() {
       let url =
         "https://prime-wood.ru/index.php?route=checkout/test_cart/regions";
@@ -450,7 +407,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     loadProducts() {
-      makeAjax(
+      this.makeAjax(
         "GET",
         `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
@@ -461,7 +418,7 @@ export default {
       );
     },
     timAddProductToCart(product_id) {
-      makeAjax(
+      this.makeAjax(
         "POST",
         `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
         "product_id=" +
@@ -512,53 +469,6 @@ export default {
         .join("&");
       return query;
     },
-    addProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
-      let len = data.options.length;
-      let changeData = {
-        product_id: data.id,
-        quantity: 1,
-      };
-      if (len != 0) {
-        let obj = {};
-        obj[+data.options[0].product_option_id] = +data.options[0]
-          .product_option_value;
-        changeData["option"] = obj;
-      }
-
-      this.moreDisabled = true;
-      fetch(url, {
-        method: "POST",
-        credentials: "include",
-        withCredentials: true,
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: this.queryParams(changeData),
-      })
-        .then((response) => {
-          console.log("что то отправили", response, "че в дате", data);
-          if (!response.ok) {
-            return Promise.reject(
-              new Error(
-                "Response failed: " +
-                  response.status +
-                  " (" +
-                  response.statusText +
-                  ")"
-              )
-            );
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Делаем что-то с данными.", data);
-        })
-        .catch((error) => {
-          console.log("что то пошло не так", error);
-        });
-    },
 
     checkedProduct() {
       let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
@@ -581,13 +491,8 @@ export default {
         0
       );
     },
-
     makeAjax(metodType, path, body, callback) {
-      let getCallback =
-        callback ||
-        function (data) {
-          console.log("makeAjax");
-        };
+      let getCallback = callback || function (data) {};
       let xhr = this.getXmlHttp();
       xhr.open(metodType, path, true);
       xhr.onload = function () {
@@ -605,6 +510,7 @@ export default {
       };
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+      xhr.withCredentials = true;
       xhr.send(body);
     },
     getXmlHttp() {
@@ -640,7 +546,7 @@ body {
   display: flex;
   flex-wrap: wrap;
 
-  display: none; //временно
+  // display: none; //временно
 }
 
 .product_card {
