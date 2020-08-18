@@ -1,7 +1,7 @@
 <template>
   <div class="checkout-box">
     <div>
-      <h1>В категории: {{ categoryTotal }}</h1>
+      <h1 class="products">В категории: {{ categoryTotal }}</h1>
       <div class="products">
         <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
           <div>{{ product.name }}</div>
@@ -30,7 +30,7 @@
           <button @click="checkedProduct()">checked</button>
           <input type="text" v-model="productToCategory" placeholder="Category" />
           <input type="text" v-model="productLimit" placeholder="Limit" />
-          <button @click.prevent="loadProducts()">Загрузить из категории</button>
+          <button @click="getProd()">Загрузить из категории</button>
         </div>
         <hr />
       </div>
@@ -49,17 +49,16 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="!hasProduct()" class="checkout-message">
+    <div v-if="gerRualProductInCart !== undefined" class="checkout-message">
       <h3>Нет товара...</h3>
-      <router-link to="/">Вернуться на главную</router-link>
     </div>
 
-    <h3 class="total" v-if="hasProduct()">
+    <h3 class="total">
       Сумма:
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
-    <form id="js_form_order" v-if="hasProduct()" @submit.prevent="submit">
+    <form id="js_form_order"  @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
@@ -123,13 +122,6 @@
               v-if="!$v.phone.minLength"
             >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
 
-            <!-- <label>
-              E-mail
-              <span class="orange">*</span>
-            </label>-->
-            <!-- <input  type="email" required name="email" value data-required class="js_localsave" /> -->
-            <!-- <input type="text" v-mask="mask" v-model="emptyEmailEmail" placeholder="00:00-23:59" /> -->
-
             <div class="form-group" :class="[{'form-group--error' : emptyEmail}, isEmailValid()]">
               <label class="form__label">
                 Email
@@ -177,9 +169,6 @@
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Регион</label>
-              <!-- <select v-model="selected" >
-                <option v-for="(val, i) in options" :value="val.product_option_value_id" :key="i">{{ val.name }}</option>
-              </select>-->
               <select
                 name="zone_id"
                 id="js_select_zone"
@@ -305,7 +294,6 @@ import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
 
-
 export default {
   data() {
     return {
@@ -356,6 +344,7 @@ export default {
     this.getRegions();
   },
   methods: {
+    ...mapActions("products", ["removeProduct"]),
     scrollToRef(refName) {
       var element = this.$refs[refName];
       var top = element.offsetTop;
@@ -402,37 +391,6 @@ export default {
           this.regions = json.zones;
         });
     },
-    // BeardedCode
-    optionsPush(productId, option) {
-      this.selectOptions[productId] = option;
-    },
-    loadProducts() {
-      this.makeAjax(
-        "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
-        "",
-        (response) => {
-          this.categoryTotal = response.total ?? 0;
-          this.categoryProducts = response.products ?? [];
-        }
-      );
-    },
-    timAddProductToCart(product_id) {
-      this.makeAjax(
-        "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
-        "product_id=" +
-          product_id +
-          (this.selectOptions[product_id]
-            ? this.selectOptions[product_id]
-            : ""),
-        (response) => {
-          console.log(response);
-        }
-      );
-    },
-    // BeardedCode
-    ...mapActions("products", ["removeProduct"]),
     submit() {
       this.$v.$touch();
       if (
@@ -481,16 +439,56 @@ export default {
         .then((response) => response.json())
         .then((json) => console.log("че в json", json));
     },
-
-    hasProduct() {
-      return this.getProductsInCart.length > 0;
-    },
     totalPrice() {
       return this.getProductsInCart.reduce(
         (current, next) => current + next.price * next.qty,
         0
       );
     },
+    // BeardedCode
+    optionsPush(productId, option) {
+      this.selectOptions[productId] = option;
+    },
+    getProd() {
+      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          this.categoryTotal = json.total;
+          this.categoryProducts = json.products;
+        });
+    },
+    loadProducts() {
+      this.makeAjax(
+        "GET",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        "",
+        (response) => {
+          this.categoryTotal = response.total || 0;
+          this.categoryProducts = response.products || [];
+        }
+      );
+    },
+    timAddProductToCart(product_id) {
+      this.makeAjax(
+        "POST",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
+        "product_id=" +
+          product_id +
+          (this.selectOptions[product_id]
+            ? this.selectOptions[product_id]
+            : ""),
+        (response) => {
+          console.log(response);
+        }
+      );
+    },
+    // BeardedCode
     makeAjax(metodType, path, body, callback) {
       let getCallback = callback || function (data) {};
       let xhr = this.getXmlHttp();
@@ -503,7 +501,6 @@ export default {
           } catch (e) {
             data = this.responseText;
           }
-          console.log('чет не так', data)
           getCallback(data);
         } else {
           alert("Error: " + this.status);
@@ -511,7 +508,6 @@ export default {
       };
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-      xhr.setRequestHeader("'Access-Control-Allow-Origin'", "*");
       xhr.withCredentials = true;
       xhr.send(body);
     },
