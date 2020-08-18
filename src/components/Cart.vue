@@ -91,7 +91,7 @@
         </div>
 
         <div class="left">
-          <div class="gr_ttl" id="gr_ttl">Контактная информация</div>
+          <div class="gr_ttl" ref="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
             <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
               <label class="form__label">
@@ -185,6 +185,7 @@
                 id="js_select_zone"
                 class="form-control"
                 v-model="selectedRegion"
+                @change="selectRegion()"
               >
                 <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
               </select>
@@ -302,6 +303,8 @@ import {
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
+import { store } from "../store";
+
 
 function getXmlHttp() {
   let xmlhttp;
@@ -394,6 +397,30 @@ export default {
     this.getRegions();
   },
   methods: {
+    scrollToRef(refName) {
+      var element = this.$refs[refName];
+      var top = element.offsetTop;
+      window.scrollTo(0, top);
+    },
+    selectRegion() {
+      let url =
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${this.selectedRegion}`;
+      var data = {
+        zone_id: this.selectedRegion, // выбранный регион
+      };
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          store.dispatch("products/loadItems");
+          console.log("selectedRegion", this.selectedRegion);
+          console.log("changeRegion получаем регион", json);
+        });
+    },
     isEmailValid: function () {
       if (this.email != "") this.emptyEmail = false;
       return this.email == ""
@@ -416,7 +443,7 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => {
-          // console.log(json.zones);
+          console.log(json.zones)
           this.selectedRegion = json.zone_id;
           this.regions = json.zones;
         });
@@ -465,6 +492,7 @@ export default {
         if (this.isEmailValid() == "") {
           this.emptyEmail = true;
         }
+        this.scrollToRef("gr_ttl");
         this.submitStatus = "ERROR";
       } else {
         this.emptyEmail = false;
