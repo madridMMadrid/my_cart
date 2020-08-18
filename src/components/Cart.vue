@@ -299,7 +299,7 @@ import {
   required,
   minLength,
   between,
-  maxLength,
+  maxLength
 } from "vuelidate/lib/validators";
 
 import ProductItem from "./ProductItem";
@@ -323,10 +323,10 @@ function getXmlHttp() {
 }
 
 function makeAjax(metodType, path, body, callback) {
-  let getCallback = callback || function (data) {};
+  let getCallback = callback || function(data) {};
   let xhr = getXmlHttp();
   xhr.open(metodType, path, true);
-  xhr.onload = function () {
+  xhr.onload = function() {
     if (this.status == 200) {
       let data;
       try {
@@ -361,22 +361,22 @@ export default {
       categoryProducts: [],
       productToCategory: "",
       productLimit: "",
-      selectOptions: {},
+      selectOptions: {}
     };
   },
   components: {
     ProductItem,
-    VueDadata,
+    VueDadata
   },
   computed: {
-    ...mapGetters("products", ["getProductsInCart", "gerRualProductInCart"]),
+    ...mapGetters("products", ["getProductsInCart", "gerRualProductInCart"])
   },
   validations: {
     fio: {
       required,
       minLength: minLength(3),
-      maxLength: maxLength(32),
-    },
+      maxLength: maxLength(32)
+    }
   },
   methods: {
     // BeardedCode
@@ -389,7 +389,7 @@ export default {
         "GET",
         `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
-        (response) => {
+        response => {
           this.categoryTotal = response.total ?? 0;
           this.categoryProducts = response.products ?? [];
         }
@@ -404,7 +404,7 @@ export default {
           (this.selectOptions[product_id]
             ? this.selectOptions[product_id]
             : ""),
-        (response) => {
+        response => {
           console.log(response);
         }
       );
@@ -427,10 +427,10 @@ export default {
     queryParams(params) {
       var esc = encodeURIComponent;
       var query = Object.keys(params)
-        .map((k) => {
+        .map(k => {
           if (params[k] instanceof Object) {
             let innetObj = Object.keys(params[k])
-              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+              .map(a => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
               .join("&");
             return k + innetObj;
           }
@@ -441,10 +441,11 @@ export default {
     },
     addProductToCart(data) {
       let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
+
       let len = data.options.length;
       let changeData = {
         product_id: data.id,
-        quantity: 1,
+        quantity: 1
       };
       if (len != 0) {
         let obj = {};
@@ -460,11 +461,11 @@ export default {
         withCredentials: true,
         cache: "no-store",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/x-www-form-urlencoded"
         },
-        body: this.queryParams(changeData),
+        body: this.queryParams(changeData)
       })
-        .then((response) => {
+        .then(response => {
           console.log("что то отправили", response, "че в дате", data);
           if (!response.ok) {
             return Promise.reject(
@@ -479,10 +480,10 @@ export default {
           }
           return response.json();
         })
-        .then((data) => {
+        .then(data => {
           console.log("Делаем что-то с данными.", data);
         })
-        .catch((error) => {
+        .catch(error => {
           console.log("что то пошло не так", error);
         });
     },
@@ -493,10 +494,10 @@ export default {
         method: "GET",
         credentials: "include",
         withCredentials: true,
-        cache: "no-store",
+        cache: "no-store"
       })
-        .then((response) => response.json())
-        .then((json) => console.log("че в json", json));
+        .then(response => response.json())
+        .then(json => console.log("че в json", json));
     },
 
     hasProduct() {
@@ -512,12 +513,12 @@ export default {
     makeAjax(metodType, path, body, callback) {
       let getCallback =
         callback ||
-        function (data) {
+        function(data) {
           console.log("makeAjax");
         };
       let xhr = this.getXmlHttp();
       xhr.open(metodType, path, true);
-      xhr.onload = function () {
+      xhr.onload = function() {
         if (this.status == 200) {
           let data;
           try {
@@ -549,8 +550,8 @@ export default {
         xmlhttp = new XMLHttpRequest();
       }
       return xmlhttp;
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss">
