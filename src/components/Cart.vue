@@ -69,60 +69,60 @@
             <input
               class="custom-checkbox"
               type="radio"
-              id="color-1"
-              name="color"
-              value="forUr"
+              id="organization"
+              name="organization"
+              value="organization"
               checked
-              v-model="picked"
+              v-model="entity_type"
             />
-            <label for="color-1">Для юридических лиц</label>
+            <label for="organization">Для юридических лиц</label>
           </div>
 
           <div class="checkbox">
             <input
               class="custom-checkbox"
               type="radio"
-              id="color-2"
-              name="color"
-              value="forFiz"
-              v-model="picked"
+              id="no_organization"
+              name="organization"
+              value="no_organization"
+              v-model="entity_type"
             />
-            <label for="color-2">Для физических лиц</label>
+            <label for="no_organization">Для физических лиц</label>
           </div>
         </div>
 
         <div class="left">
           <div class="gr_ttl" ref="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
-            <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
+            <div class="form-group" :class="{ 'form-group--error': $v.firstname.$error }">
               <label class="form__label">
                 ФИО
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-model.trim="$v.fio.$model" />
+              <input class="form__input" v-model.trim="$v.firstname.$model" />
             </div>
-            <div class="error" v-if="!$v.fio.required">Имя должно быть от 1 до 32 символов!</div>
+            <div class="error" v-if="!$v.firstname.required">Имя должно быть от 1 до 32 символов!</div>
             <div
               class="error"
-              v-if="!$v.fio.minLength"
-            >Меньше {{$v.fio.$params.minLength.min}} символов.</div>
+              v-if="!$v.firstname.minLength"
+            >Меньше {{$v.firstname.$params.minLength.min}} символов.</div>
             <div
               class="error"
-              v-if="!$v.fio.maxLength"
-            >Больше {{$v.fio.$params.maxLength.max}} символов.</div>
+              v-if="!$v.firstname.maxLength"
+            >Больше {{$v.firstname.$params.maxLength.max}} символов.</div>
 
-            <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
+            <div class="form-group" :class="{ 'form-group--error': $v.telephone.$error }">
               <label class="form__label">
                 Номер телефона
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-mask="'+7(###) ###-##-## ##'" v-model="$v.phone.$model" />
+              <input class="form__input" v-mask="'+7(###) ###-##-## ##'" v-model="$v.telephone.$model" />
             </div>
-            <div class="error" v-if="!$v.phone.required">Телефон пуст</div>
+            <div class="error" v-if="!$v.telephone.required">Телефон пуст</div>
             <div
               class="error"
-              v-if="!$v.phone.minLength"
-            >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
+              v-if="!$v.telephone.minLength"
+            >Меньше {{$v.telephone.$params.minLength.min}} символов.</div>
 
             <div class="form-group" :class="[{'form-group--error' : emptyEmail}, isEmailValid()]">
               <label class="form__label">
@@ -142,10 +142,10 @@
                 class="custom-checkbox"
                 type="radio"
                 id="color-3"
-                name="color_delivery"
-                value="delivery"
+                name="shipping_method"
+                value="flat.flat"
                 checked
-                v-model="picked_delivery"
+                v-model="shipping_method"
               />
               <label for="color-3">Доставка</label>
             </div>
@@ -155,22 +155,22 @@
                 class="custom-checkbox"
                 type="radio"
                 id="color-4"
-                name="color_delivery"
-                value="no_delivery"
-                v-model="picked_delivery"
+                name="shipping_method"
+                value="pickup.pickup"
+                v-model="shipping_method"
               />
               <label for="color-4">Свмовывоз</label>
             </div>
           </div>
 
-          <div class="deliv_addr js_delivery_toggle" v-if="picked_delivery == 'delivery'">
+          <div class="deliv_addr js_delivery_toggle" v-if="shipping_method == 'flat.flat'">
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Регион</label>
               <select
                 id="js_select_zone"
                 class="form-control"
-                v-model="selectedRegion"
+                v-model="zone_id"
                 @change="selectRegion"
               >
                 <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
@@ -178,6 +178,8 @@
 
               <label>Улица, дом, квартира</label>
               <VueDadata :onChange="getAdres" class="js_localsave" :token="token" />
+              <label>Город</label>
+              <input class="" v-model="address_1" />
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
@@ -192,20 +194,20 @@
             </p>
           </div>
 
-          <div id="requisites" style="display: block;" v-if="picked == 'forUr'">
+          <div id="requisites" style="display: block;" v-if="entity_type == 'organization'">
             <div class="gr_ttl">Реквизиты плательщика</div>
 
             <div class="fields_wrap">
               <label>Юридический адрес</label>
-              <input type="text" class="js_localsave" v-model="urAdres" />
+              <input type="text" class="js_localsave" v-model="address" />
               <label>Организация</label>
               <input type="text" v-model="organization" class="js_localsave" />
               <label>ИНН/КПП</label>
-              <input type="text" v-model="inn" class="js_localsave" />
+              <input type="text" v-model="inn_kpp" class="js_localsave" />
               <label>Р/с</label>
-              <input type="text" v-model="rc" class="js_localsave" />
+              <input type="text" v-model="rs" class="js_localsave" />
               <label>К/с</label>
-              <input type="text" v-model="kc" class="js_localsave" />
+              <input type="text" v-model="ks" class="js_localsave" />
               <label>Банк</label>
               <input type="text" v-model="bank" class="js_localsave" />
               <label>БИК</label>
@@ -216,7 +218,7 @@
         <div class="right">
           <div class="fields_wrap">
             <div class="gr_ttl">Комментарий к заказу</div>
-            <textarea v-model="coment" class="js_localsave"></textarea>
+            <textarea v-model="comment" class="js_localsave"></textarea>
           </div>
           <div class="order_info">
             <div class="clearfix">
@@ -225,7 +227,7 @@
               </div>
               <div class="right_block">
                 <div class="price">
-                  <b-form-select v-model="paymentMethod" :options="optionsPaymont"></b-form-select>
+                  <b-form-select v-model="payment_method" :options="optionsPaymont"></b-form-select>
                 </div>
               </div>
             </div>
@@ -282,24 +284,25 @@ import { store } from "../store";
 export default {
   data() {
     return {
-      picked: "forUr",
-      picked_delivery: "delivery",
+      entity_type: "organization",
+      shipping_method: "flat.flat",
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
-      selectedRegion: "",
+      zone_id: "",
       regions: "",
-      fio: "",
-      phone: "",
+      firstname: "",
+      telephone: "",
       email: "",
-      streetOrHouse: "",
-      urAdres: "",
+      city: "",
+      address_1: "",
+      address: "",
       organization: "",
-      inn: "",
-      rc: "",
-      kc: "",
+      inn_kpp: "",
+      rs: "",
+      ks: "",
       bank: "",
       bik: "",
-      coment: "",
-      paymentMethod: "2726",
+      comment: "",
+      payment_method: "2726",
       optionsPaymont: [
         { value: "2726", text: "Безналичный расчет" },
         { value: "2727", text: "Наличными курьеру" },
@@ -325,12 +328,12 @@ export default {
     ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
   },
   validations: {
-    fio: {
+    firstname: {
       required,
       minLength: minLength(3),
       maxLength: maxLength(32),
     },
-    phone: {
+    telephone: {
       required,
       minLength: minLength(17),
     },
@@ -344,7 +347,7 @@ export default {
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
-      this.streetOrHouse = val.unrestricted_value;
+      this.city = val.unrestricted_value;
     },
 
     scrollToRef(refName) {
@@ -389,7 +392,7 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => {
-          this.selectedRegion = json.zone_id;
+          this.zone_id = json.zone_id;
           this.regions = json.zones;
         });
     },
@@ -412,20 +415,23 @@ export default {
         let url =
           "https://prime-wood.ru/index.php?route=checkout/test/order/save";
         var data = {
-          selectedRegion: this.selectedRegion,
-          fio: this.fio,
-          phone: this.phone,
+          // zone_id: this.zone_id,
+          firstname: this.firstname,
+          telephone: this.telephone,
           email: this.email,
-          streetOrHouse: this.streetOrHouse,
-          urAdres: this.urAdres,
-          organization: this.organization,
-          inn: this.inn,
-          rc: this.rc,
-          kc: this.kc,
-          bank: this.bank,
-          bik: this.bik,
-          coment: this.coment,
-          paymentMethod: this.paymentMethod,
+          // city: this.city,
+          // address: this.address,
+          // organization: this.organization,
+          // inn_kpp: this.inn_kpp,
+          // rs: this.rs,
+          // ks: this.ks,
+          // bank: this.bank,
+          // bik: this.bik,
+          // comment: this.comment,
+          // payment_method: this.payment_method,
+
+          // country_id: 176,
+          // postcode: 777777
         };
         fetch(url, {
           method: "POST",
