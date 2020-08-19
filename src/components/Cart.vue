@@ -409,9 +409,6 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        // setTimeout(() => {
-        //   this.submitStatus = "OK";
-        // }, 3000);
         let url =
           "https://prime-wood.ru/index.php?route=checkout/test/order/save";
         var data = {
