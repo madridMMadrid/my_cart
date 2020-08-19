@@ -49,7 +49,7 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="gerRualProductInCart !== undefined" class="checkout-message">
+    <div v-if="lengthProduct == 0" class="checkout-message">
       <h3>Нет товара...</h3>
     </div>
 
@@ -58,7 +58,7 @@
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
-    <form id="js_form_order"  @submit.prevent="submit">
+    <form id="js_form_order" @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
@@ -114,7 +114,7 @@
                 Номер телефона
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-mask="'+7(###) ###-##-##'" v-model="$v.phone.$model" />
+              <input class="form__input" v-mask="'+7(###) ###-##-## ##'" v-model="$v.phone.$model" />
             </div>
             <div class="error" v-if="!$v.phone.required">Телефон пуст</div>
             <div
@@ -180,9 +180,7 @@
               </select>
 
               <label>Улица, дом, квартира</label>
-              <VueDadata class="js_localsave" :token="token" />
-              <label>Почтовый индекс</label>
-              <input type="text" name="postcode" value class="js_localsave" />
+              <VueDadata :onChange="getAdres" class="js_localsave" :token="token" />
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
@@ -200,38 +198,26 @@
 
             <div class="fields_wrap">
               <label>Юридический адрес</label>
-              <input
-                type="text"
-                value
-                name="organization[address]"
-                data-required
-                class="js_localsave"
-              />
+              <input type="text" class="js_localsave" v-model="urAdres" />
               <label>Организация</label>
-              <input type="text" name="organization[name]" value data-required class="js_localsave" />
+              <input type="text" v-model="organization" class="js_localsave" />
               <label>ИНН/КПП</label>
-              <input
-                type="text"
-                name="organization[inn_kpp]"
-                value
-                data-required
-                class="js_localsave"
-              />
+              <input type="text" v-model="inn" class="js_localsave" />
               <label>Р/с</label>
-              <input type="text" name="organization[rs]" value data-required class="js_localsave" />
+              <input type="text" v-model="rc" class="js_localsave" />
               <label>К/с</label>
-              <input type="text" name="organization[ks]" value data-required class="js_localsave" />
+              <input type="text" v-model="kc" class="js_localsave" />
               <label>Банк</label>
-              <input type="text" name="organization[bank]" value data-required class="js_localsave" />
+              <input type="text" v-model="bank" class="js_localsave" />
               <label>БИК</label>
-              <input type="text" name="organization[bik]" value data-required class="js_localsave" />
+              <input type="text" v-model="bik" class="js_localsave" />
             </div>
           </div>
         </div>
         <div class="right">
           <div class="fields_wrap">
             <div class="gr_ttl">Комментарий к заказу</div>
-            <textarea name="comment" class="js_localsave"></textarea>
+            <textarea v-model="coment" class="js_localsave"></textarea>
           </div>
           <div class="order_info">
             <div class="clearfix">
@@ -240,7 +226,7 @@
               </div>
               <div class="right_block">
                 <div class="price">
-                  <select name="zone_id" id="js_select_zone" class="form-control">
+                  <select v-model="paymentMethod" id="js_select_zone" class="form-control">
                     <option value="2726">Безналичный расчет</option>
                     <option value="2729">Наличными курьеру</option>
                   </select>
@@ -306,6 +292,17 @@ export default {
       regions: "",
       fio: "",
       phone: "",
+      streetOrHouse: "",
+      urAdres: "",
+      organization: "",
+      inn: "",
+      rc: "",
+      kc: "",
+      bank: "",
+      bik: "",
+      coment: "",
+      paymentMethod: "",
+
       submitStatus: null,
 
       categoryTotal: 0,
@@ -317,6 +314,7 @@ export default {
       email: "",
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
+      lengthProduct: 0
     };
   },
   components: {
@@ -342,9 +340,19 @@ export default {
   },
   created() {
     this.getRegions();
+    this.lengthProductFunction()
   },
   methods: {
     ...mapActions("products", ["removeProduct"]),
+    lengthProductFunction() {
+      setTimeout(() => {
+        this.lengthProduct = this.gerRualProductInCart.products.length
+      }, 1000)
+    },
+    getAdres(val) {
+      this.streetOrHouse = val.unrestricted_value;
+    },
+
     scrollToRef(refName) {
       var element = this.$refs[refName];
       var top = element.offsetTop;
@@ -456,6 +464,7 @@ export default {
         credentials: "include",
         withCredentials: true,
         cache: "no-store",
+        mode: "no-cors",
       })
         .then((response) => response.json())
         .then((json) => {
