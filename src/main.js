@@ -31,7 +31,7 @@ Vue.use(BootstrapVueIcons)
 
 
 new Vue({
-    el: '#app',
+    el: '#incredibleBasketApp',
     store,
     router,
     render: h => h(App)
