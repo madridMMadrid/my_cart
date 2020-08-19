@@ -82,7 +82,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/edit";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/edit";
       var data = {
         product_id: data.product_id,
         quantity: data.qty,

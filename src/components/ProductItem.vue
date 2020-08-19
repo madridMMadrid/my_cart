@@ -121,7 +121,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/edit";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/edit";
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
@@ -139,7 +139,6 @@ export default {
         body: this.queryParams(data),
       })
         .then((response) => {
-          console.log("что то отправили", response, "че в дате", data);
           if (!response.ok) {
             return Promise.reject(
               new Error(
@@ -162,7 +161,7 @@ export default {
     },
     remove(id) {
       let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/remove";
+        "https://prime-wood.ru/index.php?route=checkout/test/cart/remove";
       let data = { key: id };
 
       fetch(url, {
@@ -186,13 +185,6 @@ export default {
   watch: {
     selected(e) {
       let searchTerm = e;
-      console.log("че выбрал", searchTerm);
-      // let option_value_id = this.options.find(
-      //   (name) => name.name === searchTerm
-      // ).option_value_id;
-      // let product_option_value_id = this.options.find(
-      //   (name) => name.name === searchTerm
-      // ).product_option_value_id;
       let obj = {};
       obj[+this.one] = +searchTerm;
       this.selectValue = obj;

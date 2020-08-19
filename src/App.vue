@@ -12,6 +12,9 @@
   text-align: center;
   color: #2c3e50;
 }
+button:focus {
+  outline: none !important;
+}
 
 #nav {
   padding: 30px;

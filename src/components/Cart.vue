@@ -49,10 +49,12 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="lp == 0" class="checkout-message">
+    <div v-if="lp == 0 && loader == false" class="checkout-message">
       <h3>Нет товара...</h3>
     </div>
-
+    <div v-if="loader" class="text-center">
+      <b-spinner variant="success" type="grow" label="Spinning"></b-spinner>
+    </div>
     <h3 class="total">
       Сумма:
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
@@ -161,10 +163,7 @@
             </div>
           </div>
 
-          <div
-            class="deliv_addr js_delivery_toggle"
-            v-if="picked_delivery == 'delivery'"
-          >
+          <div class="deliv_addr js_delivery_toggle" v-if="picked_delivery == 'delivery'">
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Регион</label>
@@ -253,7 +252,10 @@
             class="button orange_btn btn_big"
             type="submit"
             :disabled="submitStatus === 'PENDING'"
-          >ОТПРАВИТЬ</button>
+          >
+            <b-spinner v-if="submitStatus === 'PENDING'" small label="Small Spinner"></b-spinner>
+            <span v-else>ОТПРАВИТЬ</span>
+          </button>
           <p class="typo__p" v-if="submitStatus === 'OK'">Спасибо за заявку!</p>
           <p class="typo__p" v-if="submitStatus === 'ERROR'">Пожалуйста, введите корректные данные</p>
           <p class="typo__p" v-if="submitStatus === 'PENDING'">Отправляем...</p>
@@ -284,10 +286,10 @@ export default {
       picked_delivery: "delivery",
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
       selectedRegion: "",
-      selectedCity: "",
       regions: "",
       fio: "",
       phone: "",
+      email: "",
       streetOrHouse: "",
       urAdres: "",
       organization: "",
@@ -300,7 +302,7 @@ export default {
       paymentMethod: "2726",
       optionsPaymont: [
         { value: "2726", text: "Безналичный расчет" },
-        { value: "2727", text: "Наличными курьеру" }
+        { value: "2727", text: "Наличными курьеру" },
       ],
 
       submitStatus: null,
@@ -311,7 +313,6 @@ export default {
       productLimit: "",
       selectOptions: {},
 
-      email: "",
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
     };
@@ -321,7 +322,7 @@ export default {
     VueDadata,
   },
   computed: {
-    ...mapGetters("products", ["gerRualProductInCart", "lp"]),
+    ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
   },
   validations: {
     fio: {
@@ -341,7 +342,7 @@ export default {
     this.getRegions();
   },
   methods: {
-    ...mapActions("products", ["removeProduct"]),
+    ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
       this.streetOrHouse = val.unrestricted_value;
     },
@@ -356,7 +357,7 @@ export default {
     },
     selectRegion({ target }) {
       console.log("смена региона", target.value);
-      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${target.value}`;
+      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -379,7 +380,7 @@ export default {
     },
     getRegions() {
       let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/regions";
+        "https://prime-wood.ru/index.php?route=checkout/test/cart/regions";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -408,9 +409,57 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        setTimeout(() => {
-          this.submitStatus = "OK";
-        }, 500);
+        // setTimeout(() => {
+        //   this.submitStatus = "OK";
+        // }, 3000);
+        let url =
+          "https://prime-wood.ru/index.php?route=checkout/test/order/save";
+        var data = {
+          selectedRegion: this.selectedRegion,
+          fio: this.fio,
+          phone: this.phone,
+          email: this.email,
+          streetOrHouse: this.streetOrHouse,
+          urAdres: this.urAdres,
+          organization: this.organization,
+          inn: this.inn,
+          rc: this.rc,
+          kc: this.kc,
+          bank: this.bank,
+          bik: this.bik,
+          coment: this.coment,
+          paymentMethod: this.paymentMethod,
+        };
+        fetch(url, {
+          method: "POST",
+          credentials: "include",
+          withCredentials: true,
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: this.queryParams(data),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return Promise.reject(
+                new Error(
+                  "Response failed: " +
+                    response.status +
+                    " (" +
+                    response.statusText +
+                    ")"
+                )
+              );
+            }
+            return response.json();
+          })
+          .then((data) => {
+            this.submitStatus = "OK";
+          })
+          .catch((error) => {
+            console.log("что то пошло не так", error);
+          });
       }
     },
     queryParams(params) {
@@ -430,7 +479,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/info";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -445,7 +494,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -462,7 +511,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -473,7 +522,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
+        `https://prime-wood.ru/index.php?route=checkout/test/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]
@@ -531,6 +580,19 @@ html,
 body {
   width: 100%;
   display: table;
+}
+.b_ttl {
+  font-size: 30px;
+  font-weight: 400;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.clearCart {
+  font-size: 14px;
+  cursor: pointer;
+  background: none;
+  text-decoration: underline;
+  text-align: left;
 }
 #js_form_order {
   // display: none; //временно
