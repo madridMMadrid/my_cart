@@ -1,7 +1,7 @@
 <template>
   <div class="checkout-box">
     <div>
-      <h1 class="products">В категории: {{ categoryTotal }}</h1>
+      <!-- <h1 class="products">В категории: {{ categoryTotal }}</h1>
       <div class="products">
         <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
           <div>{{ product.name }}</div>
@@ -33,7 +33,7 @@
           <button @click="getProd()">Загрузить из категории</button>
         </div>
         <hr />
-      </div>
+      </div>-->
     </div>
     <div class="wrapperCheckedProd"></div>
     <ul class="p-0">
@@ -49,7 +49,7 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="lengthProduct == 0" class="checkout-message">
+    <div v-if="lp == 0" class="checkout-message">
       <h3>Нет товара...</h3>
     </div>
 
@@ -163,14 +163,12 @@
 
           <div
             class="deliv_addr js_delivery_toggle"
-            data-block="flat.flat"
             v-if="picked_delivery == 'delivery'"
           >
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Регион</label>
               <select
-                name="zone_id"
                 id="js_select_zone"
                 class="form-control"
                 v-model="selectedRegion"
@@ -186,7 +184,10 @@
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной
+              <a
+                href="https://prime-wood.ru/dostavka/"
+                target="_blank"
+              >по адресу склада</a> самовывоза, по предварительной
               договорённости с
               менеджером.
             </p>
@@ -194,7 +195,6 @@
 
           <div id="requisites" style="display: block;" v-if="picked == 'forUr'">
             <div class="gr_ttl">Реквизиты плательщика</div>
-            <input type="hidden" name="organization[empty]" />
 
             <div class="fields_wrap">
               <label>Юридический адрес</label>
@@ -226,10 +226,7 @@
               </div>
               <div class="right_block">
                 <div class="price">
-                  <select v-model="paymentMethod" id="js_select_zone" class="form-control">
-                    <option value="2726">Безналичный расчет</option>
-                    <option value="2729">Наличными курьеру</option>
-                  </select>
+                  <b-form-select v-model="paymentMethod" :options="optionsPaymont"></b-form-select>
                 </div>
               </div>
             </div>
@@ -285,7 +282,6 @@ export default {
     return {
       picked: "forUr",
       picked_delivery: "delivery",
-      random: Math.floor(Math.random() * 100000),
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
       selectedRegion: "",
       selectedCity: "",
@@ -301,7 +297,11 @@ export default {
       bank: "",
       bik: "",
       coment: "",
-      paymentMethod: "",
+      paymentMethod: "2726",
+      optionsPaymont: [
+        { value: "2726", text: "Безналичный расчет" },
+        { value: "2727", text: "Наличными курьеру" }
+      ],
 
       submitStatus: null,
 
@@ -314,7 +314,6 @@ export default {
       email: "",
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
-      lengthProduct: 0
     };
   },
   components: {
@@ -322,7 +321,7 @@ export default {
     VueDadata,
   },
   computed: {
-    ...mapGetters("products", ["getProductsInCart", "gerRualProductInCart"]),
+    ...mapGetters("products", ["gerRualProductInCart", "lp"]),
   },
   validations: {
     fio: {
@@ -340,15 +339,9 @@ export default {
   },
   created() {
     this.getRegions();
-    this.lengthProductFunction()
   },
   methods: {
     ...mapActions("products", ["removeProduct"]),
-    lengthProductFunction() {
-      setTimeout(() => {
-        this.lengthProduct = this.gerRualProductInCart.products.length
-      }, 1000)
-    },
     getAdres(val) {
       this.streetOrHouse = val.unrestricted_value;
     },
@@ -446,12 +439,6 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => console.log("че в json", json));
-    },
-    totalPrice() {
-      return this.getProductsInCart.reduce(
-        (current, next) => current + next.price * next.qty,
-        0
-      );
     },
     // BeardedCode
     optionsPush(productId, option) {

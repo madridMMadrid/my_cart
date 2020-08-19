@@ -155,7 +155,6 @@ export default {
         })
         .then((data) => {
           store.dispatch("products/loadItems");
-          console.log("Делаем что-то с данными.", data);
         })
         .catch((error) => {
           console.log("что то пошло не так", error);

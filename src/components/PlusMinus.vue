@@ -56,7 +56,6 @@ export default {
     this.$emit("emitQty", this.summa);
   },
   methods: {
-    ...mapActions("products", ["plusQty", "minusQty"]),
     addEvent({ type, target }) {
       let obj = {};
       obj[+this.one] = +this.two;
@@ -105,7 +104,6 @@ export default {
         body: this.queryParams(data),
       })
         .then((response) => {
-          console.log("что то отправили", response, "че в дате", data);
           if (!response.ok) {
             return Promise.reject(
               new Error(
@@ -122,13 +120,10 @@ export default {
         .then((res) => {
           if (data.inerator == 1) {
             this.moreDisabled = false;
-            this.plusQty(this.AllInfoForProduct);
           } else {
             this.lessDisabled = false;
-            this.minusQty(this.AllInfoForProduct);
           }
           store.dispatch("products/loadItems");
-          console.log("Делаем что-то с данными.", res);
         })
         .catch((error) => {
           console.log("что то пошло не так", error);
