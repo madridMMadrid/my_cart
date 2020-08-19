@@ -116,7 +116,11 @@
                 Номер телефона
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-mask="'+7(###) ###-##-## ##'" v-model="$v.telephone.$model" />
+              <input
+                class="form__input"
+                v-mask="'+7(###) ###-##-## ##'"
+                v-model="$v.telephone.$model"
+              />
             </div>
             <div class="error" v-if="!$v.telephone.required">Телефон пуст</div>
             <div
@@ -177,9 +181,9 @@
               </select>
 
               <label>Улица, дом, квартира</label>
-              <VueDadata :onChange="getAdres" class="js_localsave" :token="token" />
+              <VueDadata :onChange="getAdres" :inputQuery="getAdres" class="js_localsave" :token="token" />
               <label>Город</label>
-              <input class="" v-model="address_1" />
+              <input class v-model="address_1" />
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
@@ -288,6 +292,7 @@ export default {
       shipping_method: "flat.flat",
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
       zone_id: "",
+
       regions: "",
       firstname: "",
       telephone: "",
@@ -302,10 +307,10 @@ export default {
       bank: "",
       bik: "",
       comment: "",
-      payment_method: "2726",
+      payment_method: "bank_transfer",
       optionsPaymont: [
-        { value: "2726", text: "Безналичный расчет" },
-        { value: "2727", text: "Наличными курьеру" },
+        { value: "bank_transfer", text: "Безналичный расчет" },
+        { value: "cod", text: "Наличными курьеру" },
       ],
 
       submitStatus: null,
@@ -347,6 +352,7 @@ export default {
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
+      console.log('какой то адрес', val)
       this.city = val.unrestricted_value;
     },
 
@@ -414,25 +420,46 @@ export default {
         this.submitStatus = "PENDING";
         let url =
           "https://prime-wood.ru/index.php?route=checkout/test/order/save";
-        var data = {
-          // zone_id: this.zone_id,
+
+        let entity_type_org = {
+          // переключатели
+          entity_type: this.entity_type,
+          shipping_method: this.shipping_method,
+
+          // обязательные поля
           firstname: this.firstname,
           telephone: this.telephone,
           email: this.email,
-          // city: this.city,
-          // address: this.address,
-          // organization: this.organization,
-          // inn_kpp: this.inn_kpp,
-          // rs: this.rs,
-          // ks: this.ks,
-          // bank: this.bank,
-          // bik: this.bik,
-          // comment: this.comment,
-          // payment_method: this.payment_method,
-
-          // country_id: 176,
-          // postcode: 777777
         };
+        let delivery_pickup = {
+          // При доставке
+          city: this.city,
+          zone_id: this.zone_id,
+          address_1: this.address_1,
+        };
+
+        let legal = {
+          // Для юредических лиц
+          address: this.address,
+          payment_method: this.payment_method,
+          organization: this.organization,
+          inn_kpp: this.inn_kpp,
+          rs: this.rs,
+          ks: this.ks,
+          bank: this.bank,
+          bik: this.bik,
+          comment: this.comment,
+        };
+        let itog = {};
+        itog = { ...entity_type_org };
+        if (this.entity_type == "organization" && this.shipping_method != "flat.flat")
+          itog = { ...entity_type_org, ...legal };
+        else if (this.entity_type != "organization" && this.shipping_method == "flat.flat")
+          itog = { ...entity_type_org, ...delivery_pickup };
+        else if (this.entity_type == "organization" && this.shipping_method == "flat.flat")
+          itog = { ...entity_type_org, ...delivery_pickup, ...legal };
+
+        console.log("склеиная дата", itog);
         fetch(url, {
           method: "POST",
           credentials: "include",
@@ -441,7 +468,7 @@ export default {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: this.queryParams(data),
+          body: this.queryParams(itog),
         })
           .then((response) => {
             if (!response.ok) {
