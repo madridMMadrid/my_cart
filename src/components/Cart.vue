@@ -354,15 +354,16 @@ export default {
       if (id == '2761' || id == '2722') {
         this.optionsPaymont.forEach((item, i, arr) => {
           if(item.value == "cod") {
-            this.optionsPaymont[i].disabled = true
+            this.optionsPaymont[i].disabled = false
           }
         });
       } else {
         this.optionsPaymont.forEach((item, i, arr) => {
           if(item.value == "cod") {
-            this.optionsPaymont[i].disabled = false
+            this.optionsPaymont[i].disabled = true
           }
         });
+        this.payment_method = "bank_transfer"
       }
     }
   },
