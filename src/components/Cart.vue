@@ -1,7 +1,7 @@
 <template>
   <div class="checkout-box">
     <div>
-      <h1 class="products">В категории: {{ categoryTotal }}</h1>
+      <!-- <h1 class="products">В категории: {{ categoryTotal }}</h1>
       <div class="products">
         <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
           <div>{{ product.name }}</div>
@@ -33,7 +33,7 @@
           <button @click="getProd()">Загрузить из категории</button>
         </div>
         <hr />
-      </div>
+      </div>-->
     </div>
     <div class="wrapperCheckedProd"></div>
     <ul class="p-0">
@@ -49,16 +49,18 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="gerRualProductInCart !== undefined" class="checkout-message">
+    <div v-if="lp == 0 && loader == false" class="checkout-message">
       <h3>Нет товара...</h3>
     </div>
-
+    <div v-if="loader" class="text-center">
+      <b-spinner variant="success" type="grow" label="Spinning"></b-spinner>
+    </div>
     <h3 class="total">
       Сумма:
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
-    <form id="js_form_order"  @submit.prevent="submit">
+    <form id="js_form_order" @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
@@ -67,60 +69,64 @@
             <input
               class="custom-checkbox"
               type="radio"
-              id="color-1"
-              name="color"
-              value="forUr"
+              id="organization"
+              name="organization"
+              value="organization"
               checked
-              v-model="picked"
+              v-model="entity_type"
             />
-            <label for="color-1">Для юридических лиц</label>
+            <label for="organization">Для юридических лиц</label>
           </div>
 
           <div class="checkbox">
             <input
               class="custom-checkbox"
               type="radio"
-              id="color-2"
-              name="color"
-              value="forFiz"
-              v-model="picked"
+              id="no_organization"
+              name="organization"
+              value="no_organization"
+              v-model="entity_type"
             />
-            <label for="color-2">Для физических лиц</label>
+            <label for="no_organization">Для физических лиц</label>
           </div>
         </div>
 
         <div class="left">
           <div class="gr_ttl" ref="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
-            <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
+            <div class="form-group" :class="{ 'form-group--error': $v.firstname.$error }">
               <label class="form__label">
                 ФИО
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-model.trim="$v.fio.$model" />
+              <input class="form__input" v-model.trim="$v.firstname.$model" />
             </div>
-            <div class="error" v-if="!$v.fio.required">Имя должно быть от 1 до 32 символов!</div>
+            <div class="error" v-if="!$v.firstname.required">Имя должно быть от 1 до 32 символов!</div>
             <div
               class="error"
-              v-if="!$v.fio.minLength"
-            >Меньше {{$v.fio.$params.minLength.min}} символов.</div>
+              v-if="!$v.firstname.minLength"
+            >Меньше {{$v.firstname.$params.minLength.min}} символов.</div>
             <div
               class="error"
-              v-if="!$v.fio.maxLength"
-            >Больше {{$v.fio.$params.maxLength.max}} символов.</div>
+              v-if="!$v.firstname.maxLength"
+            >Больше {{$v.firstname.$params.maxLength.max}} символов.</div>
 
-            <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
+            <div class="form-group" :class="{ 'form-group--error': $v.telephone.$error }">
               <label class="form__label">
                 Номер телефона
                 <span class="orange">*</span>
               </label>
-              <input class="form__input" v-mask="'+7(###) ###-##-##'" v-model="$v.phone.$model" />
+              <input
+                class="form__input"
+                v-mask="'+7(###) ###-##-## ##'"
+                v-model="$v.telephone.$model"
+              />
             </div>
-            <div class="error" v-if="!$v.phone.required">Телефон пуст</div>
+            <div class="error" v-if="!$v.telephone.required">Телефон пуст</div>
             <div
               class="error"
-              v-if="!$v.phone.minLength"
-            >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
+              v-if="!$v.telephone.minLength"
+            >Меньше {{$v.telephone.$params.minLength.min}} символов.</div>
 
             <div class="form-group" :class="[{'form-group--error' : emptyEmail}, isEmailValid()]">
               <label class="form__label">
@@ -140,10 +146,10 @@
                 class="custom-checkbox"
                 type="radio"
                 id="color-3"
-                name="color_delivery"
-                value="delivery"
+                name="shipping_method"
+                value="flat.flat"
                 checked
-                v-model="picked_delivery"
+                v-model="shipping_method"
               />
               <label for="color-3">Доставка</label>
             </div>
@@ -153,85 +159,70 @@
                 class="custom-checkbox"
                 type="radio"
                 id="color-4"
-                name="color_delivery"
-                value="no_delivery"
-                v-model="picked_delivery"
+                name="shipping_method"
+                value="pickup.pickup"
+                v-model="shipping_method"
               />
               <label for="color-4">Свмовывоз</label>
             </div>
           </div>
 
-          <div
-            class="deliv_addr js_delivery_toggle"
-            data-block="flat.flat"
-            v-if="picked_delivery == 'delivery'"
-          >
+          <div class="deliv_addr js_delivery_toggle" v-if="shipping_method == 'flat.flat'">
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
               <label>Регион</label>
               <select
-                name="zone_id"
                 id="js_select_zone"
                 class="form-control"
-                v-model="selectedRegion"
+                v-model="zone_id"
                 @change="selectRegion"
               >
                 <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
               </select>
 
               <label>Улица, дом, квартира</label>
-              <VueDadata class="js_localsave" :token="token" />
-              <label>Почтовый индекс</label>
-              <input type="text" name="postcode" value class="js_localsave" />
+              <VueDadata :onChange="getAdres" :inputQuery="getAdres" class="js_localsave" :token="token" />
+              <label>Город</label>
+              <input class v-model="address_1" />
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a href="/dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной
+              <a
+                href="https://prime-wood.ru/dostavka/"
+                target="_blank"
+              >по адресу склада</a> самовывоза, по предварительной
               договорённости с
               менеджером.
             </p>
           </div>
 
-          <div id="requisites" style="display: block;" v-if="picked == 'forUr'">
+          <div id="requisites" style="display: block;" v-if="entity_type == 'organization'">
             <div class="gr_ttl">Реквизиты плательщика</div>
-            <input type="hidden" name="organization[empty]" />
 
             <div class="fields_wrap">
               <label>Юридический адрес</label>
-              <input
-                type="text"
-                value
-                name="organization[address]"
-                data-required
-                class="js_localsave"
-              />
+              <input type="text" class="js_localsave" v-model="address" />
               <label>Организация</label>
-              <input type="text" name="organization[name]" value data-required class="js_localsave" />
+              <input type="text" v-model="organization" class="js_localsave" />
               <label>ИНН/КПП</label>
-              <input
-                type="text"
-                name="organization[inn_kpp]"
-                value
-                data-required
-                class="js_localsave"
-              />
+              <input type="text" v-model="inn_kpp" class="js_localsave" />
               <label>Р/с</label>
-              <input type="text" name="organization[rs]" value data-required class="js_localsave" />
+              <input type="text" v-model="rs" class="js_localsave" />
               <label>К/с</label>
-              <input type="text" name="organization[ks]" value data-required class="js_localsave" />
+              <input type="text" v-model="ks" class="js_localsave" />
               <label>Банк</label>
-              <input type="text" name="organization[bank]" value data-required class="js_localsave" />
+              <input type="text" v-model="bank" class="js_localsave" />
               <label>БИК</label>
-              <input type="text" name="organization[bik]" value data-required class="js_localsave" />
+              <input type="text" v-model="bik" class="js_localsave" />
             </div>
           </div>
         </div>
         <div class="right">
           <div class="fields_wrap">
             <div class="gr_ttl">Комментарий к заказу</div>
-            <textarea name="comment" class="js_localsave"></textarea>
+            <textarea v-model="comment" class="js_localsave"></textarea>
           </div>
           <div class="order_info">
             <div class="clearfix">
@@ -240,10 +231,7 @@
               </div>
               <div class="right_block">
                 <div class="price">
-                  <select name="zone_id" id="js_select_zone" class="form-control">
-                    <option value="2726">Безналичный расчет</option>
-                    <option value="2729">Наличными курьеру</option>
-                  </select>
+                  <b-form-select v-model="payment_method" :options="optionsPaymont"></b-form-select>
                 </div>
               </div>
             </div>
@@ -270,7 +258,10 @@
             class="button orange_btn btn_big"
             type="submit"
             :disabled="submitStatus === 'PENDING'"
-          >ОТПРАВИТЬ</button>
+          >
+            <b-spinner v-if="submitStatus === 'PENDING'" small label="Small Spinner"></b-spinner>
+            <span v-else>ОТПРАВИТЬ</span>
+          </button>
           <p class="typo__p" v-if="submitStatus === 'OK'">Спасибо за заявку!</p>
           <p class="typo__p" v-if="submitStatus === 'ERROR'">Пожалуйста, введите корректные данные</p>
           <p class="typo__p" v-if="submitStatus === 'PENDING'">Отправляем...</p>
@@ -297,15 +288,31 @@ import { store } from "../store";
 export default {
   data() {
     return {
-      picked: "forUr",
-      picked_delivery: "delivery",
-      random: Math.floor(Math.random() * 100000),
+      entity_type: "organization",
+      shipping_method: "flat.flat",
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
-      selectedRegion: "",
-      selectedCity: "",
+      zone_id: "",
+
       regions: "",
-      fio: "",
-      phone: "",
+      firstname: "",
+      telephone: "",
+      email: "",
+      city: "",
+      address_1: "",
+      address: "",
+      organization: "",
+      inn_kpp: "",
+      rs: "",
+      ks: "",
+      bank: "",
+      bik: "",
+      comment: "",
+      payment_method: "bank_transfer",
+      optionsPaymont: [
+        { value: "bank_transfer", text: "Безналичный расчет" },
+        { value: "cod", text: "Наличными курьеру", disabled: false },
+      ],
+
       submitStatus: null,
 
       categoryTotal: 0,
@@ -314,7 +321,6 @@ export default {
       productLimit: "",
       selectOptions: {},
 
-      email: "",
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
     };
@@ -324,15 +330,15 @@ export default {
     VueDadata
   },
   computed: {
-    ...mapGetters("products", ["getProductsInCart", "gerRualProductInCart"])
+    ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
   },
   validations: {
-    fio: {
+    firstname: {
       required,
       minLength: minLength(3),
       maxLength: maxLength(32),
     },
-    phone: {
+    telephone: {
       required,
       minLength: minLength(17),
     },
@@ -343,8 +349,30 @@ export default {
   created() {
     this.getRegions();
   },
+  watch: {
+    zone_id(id) {
+      if (id == '2761' || id == '2722') {
+        this.optionsPaymont.forEach((item, i, arr) => {
+          if(item.value == "cod") {
+            this.optionsPaymont[i].disabled = true
+          }
+        });
+      } else {
+        this.optionsPaymont.forEach((item, i, arr) => {
+          if(item.value == "cod") {
+            this.optionsPaymont[i].disabled = false
+          }
+        });
+      }
+    }
+  },
   methods: {
-    ...mapActions("products", ["removeProduct"]),
+    ...mapActions("products", ["removeProduct", "removeProductAll"]),
+    getAdres(val) {
+      console.log('какой то адрес', val)
+      this.city = val.unrestricted_value;
+    },
+
     scrollToRef(refName) {
       var element = this.$refs[refName];
       var top = element.offsetTop;
@@ -355,7 +383,7 @@ export default {
     },
     selectRegion({ target }) {
       console.log("смена региона", target.value);
-      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${target.value}`;
+      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -378,7 +406,7 @@ export default {
     },
     getRegions() {
       let url =
-        "https://prime-wood.ru/index.php?route=checkout/test_cart/regions";
+        "https://prime-wood.ru/index.php?route=checkout/test/cart/regions";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -387,7 +415,7 @@ export default {
       })
         .then((response) => response.json())
         .then((json) => {
-          this.selectedRegion = json.zone_id;
+          this.zone_id = json.zone_id;
           this.regions = json.zones;
         });
     },
@@ -407,9 +435,78 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        setTimeout(() => {
-          this.submitStatus = "OK";
-        }, 500);
+        let url =
+          "https://prime-wood.ru/index.php?route=checkout/test/order/save";
+
+        let entity_type_org = {
+          // переключатели
+          entity_type: this.entity_type,
+          shipping_method: this.shipping_method,
+
+          // обязательные поля
+          firstname: this.firstname,
+          telephone: this.telephone,
+          email: this.email,
+        };
+        let delivery_pickup = {
+          // При доставке
+          city: this.city,
+          zone_id: this.zone_id,
+          address_1: this.address_1,
+        };
+
+        let legal = {
+          // Для юредических лиц
+          payment_method: this.payment_method,
+          "organization[address]": this.address,
+          "organization[organization]": this.organization,
+          "organization[inn_kpp]": this.inn_kpp,
+          "organization[rs]": this.rs,
+          "organization[ks]": this.ks,
+          "organization[bank]": this.bank,
+          "organization[bik]": this.bik,
+          comment: this.comment,
+        };
+        let itog = {};
+        itog = { ...entity_type_org };
+        if (this.entity_type == "organization" && this.shipping_method != "flat.flat")
+          itog = { ...entity_type_org, ...legal };
+        else if (this.entity_type != "organization" && this.shipping_method == "flat.flat")
+          itog = { ...entity_type_org, ...delivery_pickup };
+        else if (this.entity_type == "organization" && this.shipping_method == "flat.flat")
+          itog = { ...entity_type_org, ...delivery_pickup, ...legal };
+
+        console.log("склеиная дата", itog);
+        fetch(url, {
+          method: "POST",
+          credentials: "include",
+          withCredentials: true,
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: this.queryParams(itog),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              return Promise.reject(
+                new Error(
+                  "Response failed: " +
+                    response.status +
+                    " (" +
+                    response.statusText +
+                    ")"
+                )
+              );
+            }
+            return response.json();
+          })
+          .then((data) => {
+            this.submitStatus = "OK";
+          })
+          .catch((error) => {
+            console.log("что то пошло не так", error);
+          });
       }
     },
     queryParams(params) {
@@ -429,7 +526,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
+      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/info";
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -439,23 +536,18 @@ export default {
         .then(response => response.json())
         .then(json => console.log("че в json", json));
     },
-    totalPrice() {
-      return this.getProductsInCart.reduce(
-        (current, next) => current + next.price * next.qty,
-        0
-      );
-    },
     // BeardedCode
     optionsPush(productId, option) {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
         withCredentials: true,
         cache: "no-store",
+        mode: "no-cors",
       })
         .then((response) => response.json())
         .then((json) => {
@@ -466,7 +558,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -477,7 +569,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
+        `https://prime-wood.ru/index.php?route=checkout/test/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]
@@ -535,6 +627,19 @@ html,
 body {
   width: 100%;
   display: table;
+}
+.b_ttl {
+  font-size: 30px;
+  font-weight: 400;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.clearCart {
+  font-size: 14px;
+  cursor: pointer;
+  background: none;
+  text-decoration: underline;
+  text-align: left;
 }
 #js_form_order {
   // display: none; //временно
