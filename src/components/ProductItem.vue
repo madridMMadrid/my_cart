@@ -1,9 +1,9 @@
 <template>
   <tr class="wrapper_list spinner">
-    <td>
+    <td class="wrap_img">
       <img :src="getProductsInCart.thumb" alt class="product-image" />
     </td>
-    <td>
+    <td class="wrap_product-name">
       <div class="product-name">
         <router-link to="/" tag="a">{{ getProductsInCart.name }}</router-link>
         <ul class="chars_list">
@@ -25,25 +25,29 @@
           <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
             <div>
-              <select v-model="selected" >
-                <option v-for="(val, i) in options" :value="val.product_option_value_id" :key="i">{{ val.name }}</option>
+              <select v-model="selected">
+                <option
+                  v-for="(val, i) in options"
+                  :value="val.product_option_value_id"
+                  :key="i"
+                >{{ val.name }}</option>
               </select>
             </div>
           </li>
         </ul>
       </div>
     </td>
-    <td>
+    <td class="wrap_inStorage">
       <div class="inStorage">
         <div class="status yes">На складе</div>
       </div>
     </td>
-    <td>
+    <td class="micro_size">
       <div class="currentSum">
         <div>{{ getProductsInCart.price }}</div>
       </div>
     </td>
-    <td>
+    <td class="micro_size">
       <PlusMinus
         :price="getProductsInCart.price"
         :qty="+getProductsInCart.quantity"
@@ -51,10 +55,10 @@
         @emitQty="sumQty"
       />
     </td>
-    <td>
+    <td class="micro_size">
       <span class="product-price">{{ getProductsInCart.total }}</span>
     </td>
-    <td>
+    <td class="closed">
       <button class="product-remove" @click="remove(getProductsInCart.cart_id)">X</button>
     </td>
   </tr>
@@ -64,7 +68,7 @@ import { mapActions } from "vuex";
 
 import PlusMinus from "./PlusMinus";
 import { log } from "util";
-import { store } from '../store';
+import { store } from "../store";
 
 export default {
   props: ["getProductsInCart", "index"],
@@ -80,7 +84,8 @@ export default {
         this.getProductsInCart.option[0].product_option_value,
       selected:
         this.getProductsInCart.option.length == 0 ||
-        this.getProductsInCart.option[0].product_option_value[0].product_option_value_id,
+        this.getProductsInCart.option[0].product_option_value[0]
+          .product_option_value_id,
       selectValue: null,
       qty: 0,
 
@@ -149,7 +154,7 @@ export default {
           return response.json();
         })
         .then((data) => {
-          store.dispatch('products/loadItems');
+          store.dispatch("products/loadItems");
           console.log("Делаем что-то с данными.", data);
         })
         .catch((error) => {
@@ -172,11 +177,9 @@ export default {
         body: this.queryParams(data),
       })
         .then((response) => {
-          
           this.removeProduct(this.index);
           response.json();
-          store.dispatch('products/loadItems');
-
+          store.dispatch("products/loadItems");
         })
         .then((json) => console.log("DELETE", json));
     },
@@ -184,7 +187,7 @@ export default {
   watch: {
     selected(e) {
       let searchTerm = e;
-      console.log("че выбрал", searchTerm)
+      console.log("че выбрал", searchTerm);
       // let option_value_id = this.options.find(
       //   (name) => name.name === searchTerm
       // ).option_value_id;
@@ -218,6 +221,54 @@ tr {
     }
   }
 }
+
+@media screen and (max-width: 600px) {
+  tr {
+    position: relative;
+    &.wrapper_list {
+      display: inline-block;
+    }
+    & td {
+      display: inline-block;
+      &.wrap_inStorage {
+        padding: 0;
+      }
+      &.closed {
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+      &.wrap_product-name {
+        width: 100%;
+      }
+      &.wrap_img {
+        & img {
+          max-width: 100%;
+          max-height: 100%;
+        }
+      }
+      & .inStorage {
+        display: none;
+      }
+      & .product-price {
+        line-height: inherit;
+      }
+    }
+  }
+}
+@media screen and (max-width: 400px) {
+  tr {
+    & td {
+      &.micro_size {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 7px 0;
+      }
+    }
+  }
+}
+
 .status {
   white-space: nowrap;
 
@@ -313,6 +364,7 @@ tr {
   place-self: center;
 }
 .wrapper_list {
+  // display: flex;
   & .spinner {
     position: relative;
     & .in_spinner {

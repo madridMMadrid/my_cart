@@ -13,6 +13,8 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import VueDadata from 'vue-dadata'
 import Vuelidate from 'vuelidate'
+import VueMask from 'v-mask'
+Vue.use(VueMask)
 
 Vue.use(VueDadata)
 Vue.use(Vuelidate)

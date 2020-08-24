@@ -1,7 +1,7 @@
 <template>
   <div class="checkout-box">
     <div>
-      <h1>В категории: {{ categoryTotal }}</h1>
+      <h1 class="products">В категории: {{ categoryTotal }}</h1>
       <div class="products">
         <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
           <div>{{ product.name }}</div>
@@ -30,13 +30,13 @@
           <button @click="checkedProduct()">checked</button>
           <input type="text" v-model="productToCategory" placeholder="Category" />
           <input type="text" v-model="productLimit" placeholder="Limit" />
-          <button @click.prevent="loadProducts()">Загрузить из категории</button>
+          <button @click="getProd()">Загрузить из категории</button>
         </div>
         <hr />
       </div>
     </div>
     <div class="wrapperCheckedProd"></div>
-    <ul>
+    <ul class="p-0">
       <table class="resp-tab">
         <tbody>
           <ProductItem
@@ -49,21 +49,20 @@
         </tbody>
       </table>
     </ul>
-    <div v-if="!hasProduct()" class="checkout-message">
+    <div v-if="gerRualProductInCart !== undefined" class="checkout-message">
       <h3>Нет товара...</h3>
-      <router-link to="/">Вернуться на главную</router-link>
     </div>
 
-    <h3 class="total" v-if="hasProduct()">
+    <h3 class="total">
       Сумма:
       <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
     </h3>
 
-    <form id="js_form_order" v-if="hasProduct()" @submit.prevent="submit">
+    <form id="js_form_order"  @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
-        <div class="entity_wrap entity_wrap_l">
+        <div class="entity_wrap">
           <div class="checkbox">
             <input
               class="custom-checkbox"
@@ -91,7 +90,7 @@
         </div>
 
         <div class="left">
-          <div class="gr_ttl">Контактная информация</div>
+          <div class="gr_ttl" ref="gr_ttl">Контактная информация</div>
           <div class="fields_wrap">
             <div class="form-group" :class="{ 'form-group--error': $v.fio.$error }">
               <label class="form__label">
@@ -110,17 +109,28 @@
               v-if="!$v.fio.maxLength"
             >Больше {{$v.fio.$params.maxLength.max}} символов.</div>
 
-            <label>
-              Номер телефона
-              <span class="orange">*</span>
-            </label>
-            <input type="text" name="telephone" value class="phone_mask js_localsave" data-required />
+            <div class="form-group" :class="{ 'form-group--error': $v.phone.$error }">
+              <label class="form__label">
+                Номер телефона
+                <span class="orange">*</span>
+              </label>
+              <input class="form__input" v-mask="'+7(###) ###-##-##'" v-model="$v.phone.$model" />
+            </div>
+            <div class="error" v-if="!$v.phone.required">Телефон пуст</div>
+            <div
+              class="error"
+              v-if="!$v.phone.minLength"
+            >Меньше {{$v.phone.$params.minLength.min}} символов.</div>
 
-            <label>
-              E-mail
-              <span class="orange">*</span>
-            </label>
-            <input type="text" name="email" value data-required class="js_localsave" />
+            <div class="form-group" :class="[{'form-group--error' : emptyEmail}, isEmailValid()]">
+              <label class="form__label">
+                Email
+                <span class="orange">*</span>
+              </label>
+              <input class="form__input" v-model="email" />
+            </div>
+            <div class="error" v-if="email">Не коректный Email</div>
+            <div class="error" v-else-if="emptyEmail">Email пустой</div>
           </div>
 
           <div class="gr_ttl">Способ доставки</div>
@@ -158,38 +168,17 @@
           >
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
-              <label>Страна</label>
-              <select
-                name="country_id"
-                id="js_select_country"
-                class="form-control"
-                @change="addProductToCart()"
-              >
-                <option value>-- Выберите страну --</option>
-                <option value="15">Азербайджан</option>
-                <option value="11">Армения</option>
-                <option value="140">Молдова</option>
-                <option value="176" selected="selected">Российская Федерация</option>
-              </select>
-
               <label>Регион</label>
               <select
                 name="zone_id"
                 id="js_select_zone"
                 class="form-control"
-                v-model="selectedReg"
-                @change="selectedRegion()"
+                v-model="selectedRegion"
+                @change="selectRegion"
               >
-                <option value>--- Выберите ---</option>
-                <option value="2726">Алтайский край</option>
-                <option value="2729">Амурская область</option>
-                <option value="2724">Архангельская область</option>
-                <option value="2725">Астраханская область</option>
-                <option value="2727">Белгородская область</option>
-                <option value="2730">Брянская область</option>
+                <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
               </select>
-              <label>Город</label>
-              <input type="text" name="city" value="Москва" class="js_localsave" />
+
               <label>Улица, дом, квартира</label>
               <VueDadata class="js_localsave" :token="token" />
               <label>Почтовый индекс</label>
@@ -277,15 +266,14 @@
               </div>
             </div>
           </div>
-          <!-- <input type="submit" name="send_order" class="orange_btn btn_big" value="ОТПРАВИТЬ" /> -->
           <button
             class="button orange_btn btn_big"
             type="submit"
             :disabled="submitStatus === 'PENDING'"
           >ОТПРАВИТЬ</button>
-          <p class="typo__p" v-if="submitStatus === 'OK'">Thanks for your submission!</p>
-          <p class="typo__p" v-if="submitStatus === 'ERROR'">Please fill the form correctly.</p>
-          <p class="typo__p" v-if="submitStatus === 'PENDING'">Sending...</p>
+          <p class="typo__p" v-if="submitStatus === 'OK'">Спасибо за заявку!</p>
+          <p class="typo__p" v-if="submitStatus === 'ERROR'">Пожалуйста, введите корректные данные</p>
+          <p class="typo__p" v-if="submitStatus === 'PENDING'">Отправляем...</p>
         </div>
       </div>
     </form>
@@ -304,46 +292,7 @@ import {
 
 import ProductItem from "./ProductItem";
 import { log } from "util";
-
-function getXmlHttp() {
-  let xmlhttp;
-  try {
-    xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-  } catch (e) {
-    try {
-      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-    } catch (e) {
-      xmlhttp = false;
-    }
-  }
-  if (!xmlhttp && typeof XMLHttpRequest != "undefined") {
-    xmlhttp = new XMLHttpRequest();
-  }
-  return xmlhttp;
-}
-
-function makeAjax(metodType, path, body, callback) {
-  let getCallback = callback || function(data) {};
-  let xhr = getXmlHttp();
-  xhr.open(metodType, path, true);
-  xhr.onload = function() {
-    if (this.status == 200) {
-      let data;
-      try {
-        data = JSON.parse(this.responseText);
-      } catch (e) {
-        data = this.responseText;
-      }
-      getCallback(data);
-    } else {
-      alert("Error: " + this.status);
-    }
-  };
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-  xhr.withCredentials = true;
-  xhr.send(body);
-}
+import { store } from "../store";
 
 export default {
   data() {
@@ -352,16 +301,22 @@ export default {
       picked_delivery: "delivery",
       random: Math.floor(Math.random() * 100000),
       token: "84adece4ab466da7fcb4aa269180fdc143037b0a",
-      selectedReg: "",
+      selectedRegion: "",
+      selectedCity: "",
+      regions: "",
       fio: "",
-      age: 0,
+      phone: "",
       submitStatus: null,
 
       categoryTotal: 0,
       categoryProducts: [],
       productToCategory: "",
       productLimit: "",
-      selectOptions: {}
+      selectOptions: {},
+
+      email: "",
+      reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+      emptyEmail: false,
     };
   },
   components: {
@@ -375,49 +330,82 @@ export default {
     fio: {
       required,
       minLength: minLength(3),
-      maxLength: maxLength(32)
-    }
+      maxLength: maxLength(32),
+    },
+    phone: {
+      required,
+      minLength: minLength(17),
+    },
+    email: {
+      required,
+    },
+  },
+  created() {
+    this.getRegions();
   },
   methods: {
-    // BeardedCode
-    optionsPush(productId, option) {
-      this.selectOptions[productId] = option;
-    },
-    // https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=122&limit=10
-    loadProducts() {
-      makeAjax(
-        "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
-        "",
-        response => {
-          this.categoryTotal = response.total ?? 0;
-          this.categoryProducts = response.products ?? [];
-        }
-      );
-    },
-    timAddProductToCart(product_id) {
-      makeAjax(
-        "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
-        "product_id=" +
-          product_id +
-          (this.selectOptions[product_id]
-            ? this.selectOptions[product_id]
-            : ""),
-        response => {
-          console.log(response);
-        }
-      );
-    },
-    // BeardedCode
     ...mapActions("products", ["removeProduct"]),
+    scrollToRef(refName) {
+      var element = this.$refs[refName];
+      var top = element.offsetTop;
+      window.scrollTo({
+        top,
+        behavior: "smooth",
+      });
+    },
+    selectRegion({ target }) {
+      console.log("смена региона", target.value);
+      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/changeRegion&zone_id=${target.value}`;
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          store.dispatch("products/loadItems");
+          console.log(json);
+        });
+    },
+    isEmailValid: function () {
+      if (this.email != "") this.emptyEmail = false;
+      return this.email == ""
+        ? ""
+        : this.reg.test(this.email)
+        ? "has-success"
+        : "form-group--error";
+    },
+    getRegions() {
+      let url =
+        "https://prime-wood.ru/index.php?route=checkout/test_cart/regions";
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          this.selectedRegion = json.zone_id;
+          this.regions = json.zones;
+        });
+    },
     submit() {
-      console.log("submit!");
       this.$v.$touch();
-      if (this.$v.$invalid) {
+      if (
+        this.$v.$invalid ||
+        this.isEmailValid() == "" ||
+        this.isEmailValid() == false ||
+        this.isEmailValid() !== "has-success"
+      ) {
+        if (this.isEmailValid() == "") {
+          this.emptyEmail = true;
+        }
+        this.scrollToRef("gr_ttl");
         this.submitStatus = "ERROR";
       } else {
-        // do your submit logic here
+        this.emptyEmail = false;
         this.submitStatus = "PENDING";
         setTimeout(() => {
           this.submitStatus = "OK";
@@ -439,54 +427,6 @@ export default {
         .join("&");
       return query;
     },
-    addProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/add";
-
-      let len = data.options.length;
-      let changeData = {
-        product_id: data.id,
-        quantity: 1
-      };
-      if (len != 0) {
-        let obj = {};
-        obj[+data.options[0].product_option_id] = +data.options[0]
-          .product_option_value;
-        changeData["option"] = obj;
-      }
-
-      this.moreDisabled = true;
-      fetch(url, {
-        method: "POST",
-        credentials: "include",
-        withCredentials: true,
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: this.queryParams(changeData)
-      })
-        .then(response => {
-          console.log("что то отправили", response, "че в дате", data);
-          if (!response.ok) {
-            return Promise.reject(
-              new Error(
-                "Response failed: " +
-                  response.status +
-                  " (" +
-                  response.statusText +
-                  ")"
-              )
-            );
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log("Делаем что-то с данными.", data);
-        })
-        .catch(error => {
-          console.log("что то пошло не так", error);
-        });
-    },
 
     checkedProduct() {
       let url = "https://prime-wood.ru/index.php?route=checkout/test_cart/info";
@@ -499,26 +439,61 @@ export default {
         .then(response => response.json())
         .then(json => console.log("че в json", json));
     },
-
-    hasProduct() {
-      return this.getProductsInCart.length > 0;
-    },
     totalPrice() {
       return this.getProductsInCart.reduce(
         (current, next) => current + next.price * next.qty,
         0
       );
     },
-
+    // BeardedCode
+    optionsPush(productId, option) {
+      this.selectOptions[productId] = option;
+    },
+    getProd() {
+      let url = `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      fetch(url, {
+        method: "GET",
+        credentials: "include",
+        withCredentials: true,
+        cache: "no-store",
+      })
+        .then((response) => response.json())
+        .then((json) => {
+          this.categoryTotal = json.total;
+          this.categoryProducts = json.products;
+        });
+    },
+    loadProducts() {
+      this.makeAjax(
+        "GET",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        "",
+        (response) => {
+          this.categoryTotal = response.total || 0;
+          this.categoryProducts = response.products || [];
+        }
+      );
+    },
+    timAddProductToCart(product_id) {
+      this.makeAjax(
+        "POST",
+        `https://prime-wood.ru/index.php?route=checkout/test_cart/add`,
+        "product_id=" +
+          product_id +
+          (this.selectOptions[product_id]
+            ? this.selectOptions[product_id]
+            : ""),
+        (response) => {
+          console.log(response);
+        }
+      );
+    },
+    // BeardedCode
     makeAjax(metodType, path, body, callback) {
-      let getCallback =
-        callback ||
-        function(data) {
-          console.log("makeAjax");
-        };
+      let getCallback = callback || function (data) {};
       let xhr = this.getXmlHttp();
       xhr.open(metodType, path, true);
-      xhr.onload = function() {
+      xhr.onload = () => {
         if (this.status == 200) {
           let data;
           try {
@@ -533,6 +508,7 @@ export default {
       };
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+      xhr.withCredentials = true;
       xhr.send(body);
     },
     getXmlHttp() {
@@ -555,10 +531,20 @@ export default {
 };
 </script>
 <style lang="scss">
+html,
+body {
+  width: 100%;
+  display: table;
+}
+#js_form_order {
+  // display: none; //временно
+}
 /* BeardedCode */
 .products {
   display: flex;
   flex-wrap: wrap;
+
+  // display: none; //временно
 }
 
 .product_card {
@@ -577,7 +563,11 @@ export default {
 
 .vue-dadata {
   float: left !important;
-
+  &__search {
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
+  }
   &__input {
     border: 1px solid #d6d5cc !important;
     border-radius: 3px !important;
@@ -585,7 +575,16 @@ export default {
     padding: 5px 10px !important;
     font-size: 14px !important;
     margin-bottom: 10px !important;
+    width: 250px;
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
+  }
+  &__container {
     width: 250px !important;
+    @media screen and (max-width: 600px) {
+      width: 100% !important;
+    }
   }
 
   &__suggestions {
@@ -762,6 +761,9 @@ export default {
 .order_block .entity_wrap {
   margin: 20px 0;
   display: flex;
+  & input {
+    width: auto;
+  }
 }
 
 .entity_wrap label {
@@ -973,5 +975,56 @@ input {
 .form-group--error + .error {
   display: block;
   color: #f57f6c;
+}
+@media screen and (max-width: 900px) {
+  .order_block {
+    & .right {
+      float: left;
+      width: 100%;
+    }
+  }
+}
+@media screen and (max-width: 600px) {
+  .form-control,
+  .js_localsave {
+    width: 100%;
+    & .vue-dadata__search {
+      width: 100%;
+    }
+    & .vue-dadata__input {
+      width: 100% !important;
+    }
+    & .vue-dadata__container {
+      width: 100% !important;
+    }
+  }
+  .order_block {
+    & .right {
+      width: 100%;
+    }
+    & .left {
+      width: 100%;
+      & .fields_wrap {
+        & .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+        & label,
+        input {
+          width: 100%;
+          margin: 0;
+        }
+      }
+    }
+    & .order_info {
+      & .left_block,
+      .right_block {
+        width: 100%;
+        padding: 0 5px;
+        text-align: center;
+        border: none;
+      }
+    }
+  }
 }
 </style>

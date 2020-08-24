@@ -11,7 +11,6 @@
           min="1"
           class="product-card-buy-count-input"
           @change="addEvent"
-          @input="addEventChange"
           @keyup.enter="addEvent"
           v-model="summa"
           value="summa"
@@ -67,9 +66,6 @@ export default {
         qty: target.value,
         option: obj,
       });
-    },
-    addEventChange({ type, target }) {
-      console.log("addEventChange", target.value);
     },
     queryParams(params) {
       var esc = encodeURIComponent;
