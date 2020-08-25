@@ -24,12 +24,13 @@
           </li>
           <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
             <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
-            <div>
-              <select v-model="selected">
+            <div class="select">
+              <select v-model="selected" class="select-css">
                 <option
                   v-for="(val, i) in options"
                   :value="val.product_option_value_id"
                   :key="i"
+                  :style="`background-image:url(${val.image});`"
                 >{{ val.name }}</option>
               </select>
             </div>
@@ -311,22 +312,36 @@ tr.wrapper_list.spinner {
     }
     & .char_list_material {
       display: flex;
-      & select {
-        width: 100px;
-        height: 20px;
-        margin-left: 5px;
-        border: none;
-        box-shadow: none;
-        background: none;
-        & option {
-          background: none;
-          -moz-appearance: none;
-          &:hover {
+      & .select {
+        position: relative;
+        & select {
+          &.select-css {
+            display: block;
+            width: 100%;
+            padding: 2px 15px 2px 10px;
             background: none;
+            border: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            font-family: inherit;
+            font-size: 1rem;
+            color: #444;
           }
         }
-        &:hover {
-          background: none;
+        &:after {
+          content: "";
+          display: block;
+          border-style: solid;
+          border-width: 6px 5px 0 5px;
+          border-color: #000 transparent transparent transparent;
+          pointer-events: none;
+          position: absolute;
+          top: 50%;
+          right: 5px;
+          z-index: 1;
+          margin-top: -3px;
         }
       }
       & .custom-select {

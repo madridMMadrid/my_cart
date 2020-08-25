@@ -207,7 +207,11 @@
               </div>
               <div class="right_block">
                 <div class="priceSelect">
-                  <b-form-select class="multiple" v-model="payment_method" :options="optionsPaymont"></b-form-select>
+                  <b-form-select
+                    class="multiple"
+                    v-model="payment_method"
+                    :options="optionsPaymont"
+                  ></b-form-select>
                 </div>
               </div>
             </div>
@@ -617,48 +621,49 @@ export default {
   margin: 50px auto;
   box-sizing: border-box;
   padding: 1em;
+  & select.multiple {
+    opacity: 1;
+  }
 
-.checkout-list {
-  padding: 0;
-}
+  .checkout-list {
+    padding: 0;
+  }
 
-.total {
-  font-size: 2em;
-  font-weight: bold;
-  align-self: flex-end;
-  position: relative;
-  padding-right: 38px;
+  .total {
+    font-size: 2em;
+    font-weight: bold;
+    align-self: flex-end;
+    position: relative;
+    padding-right: 38px;
 
-  &::before {
-    content: "РУБ";
-    position: absolute;
-    top: 4px;
-    right: 0;
-    font-size: 16px;
+    &::before {
+      content: "РУБ";
+      position: absolute;
+      top: 4px;
+      right: 0;
+      font-size: 16px;
+    }
+  }
+
+  .checkout-message {
+    font-size: 1.5em;
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: all 0.5s;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    transform: translateX(-40px);
+    opacity: 0;
+  }
+
+  .order_block .right {
+    width: 425px;
   }
 }
-
-.checkout-message {
-  font-size: 1.5em;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.5s;
-}
-
-.fade-enter,
-.fade-leave-to {
-  transform: translateX(-40px);
-  opacity: 0;
-}
-
-.order_block .right {
-  width: 425px;
-}
-
-}
-
 
 .right {
   float: right;
@@ -735,7 +740,7 @@ export default {
 .order_info .priceSelect {
   font-weight: 700;
   margin-bottom: 5px;
-  &.multiple {
+  & .multiple {
     opacity: 1;
   }
 }
@@ -804,7 +809,8 @@ export default {
 }
 
 .fields_wrap input[type="text"],
-.form-control, #js_select_zone {
+.form-control,
+#js_select_zone {
   margin-bottom: 10px;
   width: 250px;
   height: 30px;
@@ -1002,13 +1008,14 @@ input {
   .order_block {
     & .right {
       float: left;
-      width: 100%;
+      width: 100% !important;
     }
   }
 }
 @media screen and (max-width: 600px) {
   .form-control,
-  .js_localsave, #js_select_zone {
+  .js_localsave,
+  #js_select_zone {
     width: 100%;
     & .vue-dadata__search {
       width: 100%;
@@ -1022,7 +1029,7 @@ input {
   }
   .order_block {
     & .right {
-      width: 100%;
+      width: 100% !important;
     }
     & .left {
       width: 100%;
