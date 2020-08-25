@@ -6,22 +6,20 @@ import { store } from '../store';
 
 Vue.use(VueRouter)
 
-  const routes = [
-  {
-    path: '/',
+const routes = [{
+    path: '*',
     name: 'Home',
     component: Home,
     beforeEnter(from, to, next) {
-      store.dispatch('products/loadItems');
-      next();
-  }
-  },
-]
+        store.dispatch('products/loadItems');
+        next();
+    }
+}, ]
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes
 })
 
 export default router
