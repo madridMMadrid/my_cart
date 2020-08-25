@@ -1,40 +1,6 @@
 <template>
   <div class="checkout-box">
-    <div>
-      <!-- <h1 class="products">В категории: {{ categoryTotal }}</h1>
-      <div class="products">
-        <div class="product_card" v-for="(product, i) in categoryProducts" :key="i">
-          <div>{{ product.name }}</div>
-          <div>
-            <img :src="product.thumb" :alt="product.name" />
-          </div>
-          <div>{{ product.product_id }}</div>
-          <div v-for="(group, i) in product.options" :key="i">
-            <label :for="'label_select_' + group.product_option_id">{{group.name}}</label>
-            <select
-              :id="'label_select_' + group.product_option_id"
-              v-on:change="optionsPush(product.product_id, '&option[' + group.product_option_id + ']=' + $event.target.value)"
-            >
-              <option value>--- Выберите ---</option>
-              <div v-for="(all_options, y) in group.product_option_value" :key="y">
-                <option
-                  :value="all_options.product_option_value_id"
-                >{{all_options.name}} = [{{group.product_option_id}}:{{all_options.product_option_value_id}}]</option>
-              </div>
-            </select>
-          </div>
-          <button @click="timAddProductToCart(product.product_id)">Добавить в корзину</button>
-        </div>
-        <hr />
-        <div>
-          <button @click="checkedProduct()">checked</button>
-          <input type="text" v-model="productToCategory" placeholder="Category" />
-          <input type="text" v-model="productLimit" placeholder="Limit" />
-          <button @click="getProd()">Загрузить из категории</button>
-        </div>
-        <hr />
-      </div>-->
-    </div>
+    <div></div>
     <div class="wrapperCheckedProd"></div>
     <ul class="p-0">
       <table class="resp-tab">
@@ -67,7 +33,7 @@
         <div class="entity_wrap">
           <div class="checkbox">
             <input
-              class="custom-checkbox"
+              class="custom-checkbox no_style"
               type="radio"
               id="organization"
               name="organization"
@@ -80,7 +46,7 @@
 
           <div class="checkbox">
             <input
-              class="custom-checkbox"
+              class="custom-checkbox no_style"
               type="radio"
               id="no_organization"
               name="organization"
@@ -143,7 +109,7 @@
           <div class="entity_wrap" id="js_shipping_method">
             <div class="checkbox">
               <input
-                class="custom-checkbox"
+                class="custom-checkbox no_style"
                 type="radio"
                 id="color-3"
                 name="shipping_method"
@@ -156,7 +122,7 @@
 
             <div class="checkbox">
               <input
-                class="custom-checkbox"
+                class="custom-checkbox no_style"
                 type="radio"
                 id="color-4"
                 name="shipping_method"
@@ -170,20 +136,30 @@
           <div class="deliv_addr js_delivery_toggle" v-if="shipping_method == 'flat.flat'">
             <div class="gr_ttl">Адрес для доставки</div>
             <div class="fields_wrap">
-              <label>Регион</label>
-              <select
-                id="js_select_zone"
-                class="form-control"
-                v-model="zone_id"
-                @change="selectRegion"
-              >
-                <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
-              </select>
-
-              <label>Улица, дом, квартира</label>
-              <VueDadata :onChange="getAdres" :inputQuery="getAdres" class="js_localsave" :token="token" />
-              <label>Город</label>
-              <input class v-model="address_1" />
+              <div>
+                <label>Регион</label>
+                <select
+                  id="js_select_zone"
+                  class="form-control multiple"
+                  v-model="zone_id"
+                  @change="selectRegion"
+                >
+                  <option v-for="(val, i) in regions" :key="i" :value="val.zone_id">{{ val.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label>Улица, дом, квартира</label>
+                <VueDadata
+                  :onChange="getAdres"
+                  :inputQuery="getAdres"
+                  class="js_localsave"
+                  :token="token"
+                />
+              </div>
+              <div>
+                <label>Город</label>
+                <input class="js_localsave" type="text" v-model="address_1" />
+              </div>
             </div>
           </div>
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
@@ -230,8 +206,8 @@
                 <div class="order_label">Cпособ оплаты</div>
               </div>
               <div class="right_block">
-                <div class="price">
-                  <b-form-select v-model="payment_method" :options="optionsPaymont"></b-form-select>
+                <div class="priceSelect">
+                  <b-form-select class="multiple" v-model="payment_method" :options="optionsPaymont"></b-form-select>
                 </div>
               </div>
             </div>
@@ -255,7 +231,7 @@
             </div>
           </div>
           <button
-            class="button orange_btn btn_big"
+            class="button orange_btn_cart btn_big"
             type="submit"
             :disabled="submitStatus === 'PENDING'"
           >
@@ -278,7 +254,7 @@ import {
   required,
   minLength,
   between,
-  maxLength
+  maxLength,
 } from "vuelidate/lib/validators";
 
 import ProductItem from "./ProductItem";
@@ -327,7 +303,7 @@ export default {
   },
   components: {
     ProductItem,
-    VueDadata
+    VueDadata,
   },
   computed: {
     ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
@@ -351,26 +327,26 @@ export default {
   },
   watch: {
     zone_id(id) {
-      if (id == '2761' || id == '2722') {
+      if (id == "2761" || id == "2722") {
         this.optionsPaymont.forEach((item, i, arr) => {
-          if(item.value == "cod") {
-            this.optionsPaymont[i].disabled = false
+          if (item.value == "cod") {
+            this.optionsPaymont[i].disabled = false;
           }
         });
       } else {
         this.optionsPaymont.forEach((item, i, arr) => {
-          if(item.value == "cod") {
-            this.optionsPaymont[i].disabled = true
+          if (item.value == "cod") {
+            this.optionsPaymont[i].disabled = true;
           }
         });
-        this.payment_method = "bank_transfer"
+        this.payment_method = "bank_transfer";
       }
-    }
+    },
   },
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
-      console.log('какой то адрес', val)
+      console.log("какой то адрес", val);
       this.city = val.unrestricted_value;
     },
 
@@ -470,11 +446,20 @@ export default {
         };
         let itog = {};
         itog = { ...entity_type_org };
-        if (this.entity_type == "organization" && this.shipping_method != "flat.flat")
+        if (
+          this.entity_type == "organization" &&
+          this.shipping_method != "flat.flat"
+        )
           itog = { ...entity_type_org, ...legal };
-        else if (this.entity_type != "organization" && this.shipping_method == "flat.flat")
+        else if (
+          this.entity_type != "organization" &&
+          this.shipping_method == "flat.flat"
+        )
           itog = { ...entity_type_org, ...delivery_pickup };
-        else if (this.entity_type == "organization" && this.shipping_method == "flat.flat")
+        else if (
+          this.entity_type == "organization" &&
+          this.shipping_method == "flat.flat"
+        )
           itog = { ...entity_type_org, ...delivery_pickup, ...legal };
 
         console.log("склеиная дата", itog);
@@ -513,10 +498,10 @@ export default {
     queryParams(params) {
       var esc = encodeURIComponent;
       var query = Object.keys(params)
-        .map(k => {
+        .map((k) => {
           if (params[k] instanceof Object) {
             let innetObj = Object.keys(params[k])
-              .map(a => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
+              .map((a) => `${"[" + esc(a) + "]"}=${esc(params[k][a])}`)
               .join("&");
             return k + innetObj;
           }
@@ -532,10 +517,10 @@ export default {
         method: "GET",
         credentials: "include",
         withCredentials: true,
-        cache: "no-store"
+        cache: "no-store",
       })
-        .then(response => response.json())
-        .then(json => console.log("че в json", json));
+        .then((response) => response.json())
+        .then((json) => console.log("че в json", json));
     },
     // BeardedCode
     optionsPush(productId, option) {
@@ -619,86 +604,11 @@ export default {
         xmlhttp = new XMLHttpRequest();
       }
       return xmlhttp;
-    }
-  }
+    },
+  },
 };
 </script>
-<style lang="scss">
-html,
-body {
-  width: 100%;
-  display: table;
-}
-.b_ttl {
-  font-size: 30px;
-  font-weight: 400;
-  margin-bottom: 20px;
-  text-align: left;
-}
-.clearCart {
-  font-size: 14px;
-  cursor: pointer;
-  background: none;
-  text-decoration: underline;
-  text-align: left;
-}
-#js_form_order {
-  // display: none; //временно
-}
-/* BeardedCode */
-.products {
-  display: flex;
-  flex-wrap: wrap;
-
-  // display: none; //временно
-}
-
-.product_card {
-  width: 25%;
-  outline: 1px solid #ddd;
-}
-
-.product_card img {
-  max-width: 100%;
-}
-
-/* BeardedCode */
-.wrapperCheckedProd {
-  display: flex;
-}
-
-.vue-dadata {
-  float: left !important;
-  &__search {
-    @media screen and (max-width: 600px) {
-      width: 100% !important;
-    }
-  }
-  &__input {
-    border: 1px solid #d6d5cc !important;
-    border-radius: 3px !important;
-    height: 30px !important;
-    padding: 5px 10px !important;
-    font-size: 14px !important;
-    margin-bottom: 10px !important;
-    width: 250px;
-    @media screen and (max-width: 600px) {
-      width: 100% !important;
-    }
-  }
-  &__container {
-    width: 250px !important;
-    @media screen and (max-width: 600px) {
-      width: 100% !important;
-    }
-  }
-
-  &__suggestions {
-    border: 1px solid #888;
-  }
-}
-</style>
-<style lang="scss" scoped>
+<style lang="scss" >
 .checkout-box {
   width: 100%;
   max-width: 900px;
@@ -707,7 +617,6 @@ body {
   margin: 50px auto;
   box-sizing: border-box;
   padding: 1em;
-}
 
 .checkout-list {
   padding: 0;
@@ -747,6 +656,9 @@ body {
 .order_block .right {
   width: 425px;
 }
+
+}
+
 
 .right {
   float: right;
@@ -820,9 +732,12 @@ body {
   width: 186px;
 }
 
-.order_info .price {
+.order_info .priceSelect {
   font-weight: 700;
   margin-bottom: 5px;
+  &.multiple {
+    opacity: 1;
+  }
 }
 
 .order_info .total_order_price {
@@ -842,7 +757,7 @@ body {
   width: 160px;
 }
 
-.order_block .orange_btn {
+.order_block .orange_btn_cart {
   display: block;
   margin: 0 auto;
   width: 170px;
@@ -889,9 +804,10 @@ body {
 }
 
 .fields_wrap input[type="text"],
-.form-control {
+.form-control, #js_select_zone {
   margin-bottom: 10px;
   width: 250px;
+  height: 30px;
 }
 
 .delivery_pickup_txt {
@@ -1092,7 +1008,7 @@ input {
 }
 @media screen and (max-width: 600px) {
   .form-control,
-  .js_localsave {
+  .js_localsave, #js_select_zone {
     width: 100%;
     & .vue-dadata__search {
       width: 100%;

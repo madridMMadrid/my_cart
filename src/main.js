@@ -28,6 +28,7 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
     // import VueCarousel from '@chenfengyuan/vue-carousel';
 Vue.use(BootstrapVueIcons)
+// Vue.config.devtools = true
 
 
 new Vue({
