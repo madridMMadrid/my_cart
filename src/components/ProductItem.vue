@@ -328,6 +328,7 @@ tr.wrapper_list.spinner {
             font-family: inherit;
             font-size: 1rem;
             color: #444;
+            box-shadow: none;
           }
         }
         &:after {

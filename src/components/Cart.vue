@@ -290,7 +290,7 @@ export default {
       payment_method: "bank_transfer",
       optionsPaymont: [
         { value: "bank_transfer", text: "Безналичный расчет" },
-        { value: "cod", text: "Наличными курьеру", disabled: false },
+        { value: "cod", text: "Наличными курьеру" },
       ],
 
       submitStatus: null,
@@ -332,15 +332,11 @@ export default {
   watch: {
     zone_id(id) {
       if (id == "2761" || id == "2722") {
-        this.optionsPaymont.forEach((item, i, arr) => {
-          if (item.value == "cod") {
-            this.optionsPaymont[i].disabled = false;
-          }
-        });
+        this.optionsPaymont.push({ value: "cod", text: "Наличными курьеру" });
       } else {
         this.optionsPaymont.forEach((item, i, arr) => {
           if (item.value == "cod") {
-            this.optionsPaymont[i].disabled = true;
+            this.optionsPaymont.splice(i, 1);
           }
         });
         this.payment_method = "bank_transfer";
