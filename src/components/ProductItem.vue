@@ -122,7 +122,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/edit";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
@@ -162,7 +162,7 @@ export default {
     },
     remove(id) {
       let url =
-        "https://prime-wood.ru/index.php?route=checkout/test/cart/remove";
+        `${this.$root.base_url}index.php?route=checkout/test/cart/remove`;
       let data = { key: id };
 
       fetch(url, {

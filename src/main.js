@@ -30,10 +30,12 @@ Vue.use(IconsPlugin)
 Vue.use(BootstrapVueIcons)
 // Vue.config.devtools = true
 
-
 new Vue({
     el: '#incredibleBasketApp',
     store,
     router,
+    data: {
+        base_url: (process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : '')
+    },
     render: h => h(App)
 })

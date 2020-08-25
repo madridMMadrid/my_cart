@@ -166,7 +166,7 @@
             <p>
               Заказ вы можете забрать
               <a
-                href="https://prime-wood.ru/dostavka/"
+                href="dostavka/"
                 target="_blank"
               >по адресу склада</a> самовывоза, по предварительной
               договорённости с
@@ -360,7 +360,8 @@ export default {
     },
     selectRegion({ target }) {
       console.log("смена региона", target.value);
-      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
+      // ${this.$root.base_url}
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -383,7 +384,7 @@ export default {
     },
     getRegions() {
       let url =
-        "https://prime-wood.ru/index.php?route=checkout/test/cart/regions";
+        `${this.$root.base_url}index.php?route=checkout/test/cart/regions`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -413,7 +414,7 @@ export default {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
         let url =
-          "https://prime-wood.ru/index.php?route=checkout/test/order/save";
+          `${this.$root.base_url}index.php?route=checkout/test/order/save`;
 
         let entity_type_org = {
           // переключатели
@@ -512,7 +513,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/info";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/info`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -527,7 +528,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -544,7 +545,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -555,7 +556,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test/cart/add`,
+        `${this.$root.base_url}index.php?route=checkout/test/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]
