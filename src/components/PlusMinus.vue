@@ -29,7 +29,7 @@ import { log } from "util";
 import { store } from "../store";
 
 export default {
-  props: ["price", "qty", "AllInfoForProduct"],
+  props: ["price", "qty", "AllInfoForProduct", "selectValue"],
   data() {
     return {
       summa: this.qty,
@@ -44,6 +44,7 @@ export default {
         this.AllInfoForProduct.option[0].product_option_value_id,
       moreDisabled: false,
       lessDisabled: false,
+      selectValueData: this.selectValue
     };
   },
   watch: {
@@ -63,7 +64,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: target.value,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
       });
     },
     queryParams(params) {
@@ -139,7 +140,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: this.summa,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
         inerator: 1,
       });
     },
@@ -155,7 +156,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: this.summa,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
         inerator: 0,
       });
     },

@@ -23,13 +23,13 @@
             </span>
           </li>
           <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
-            <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
+            <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i + val.product_option_value_id">{{val.name}}:</div>
             <div class="select">
-              <select v-model="selected" class="select-css">
+              <select v-model="selected" class="select-css multiple">
                 <option
                   v-for="(val, i) in options"
                   :value="val.product_option_value_id"
-                  :key="i"
+                  :key="i+val.product_option_value_id"
                   :style="`background-image:url(${val.image});`"
                 >{{ val.name }}</option>
               </select>
@@ -53,6 +53,7 @@
         :price="getProductsInCart.price"
         :qty="+getProductsInCart.quantity"
         :AllInfoForProduct="getProductsInCart"
+        :selectValue="selectValue"
         @emitQty="sumQty"
       />
     </td>

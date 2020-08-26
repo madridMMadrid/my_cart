@@ -261,6 +261,7 @@ import {
 import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
+import { ListGroupPlugin } from 'bootstrap-vue';
 
 export default {
   data() {
@@ -340,7 +341,13 @@ export default {
       }
     },
     gerRualProductInCart(e) {
-      this.city = e.shipping_address.city
+      this.city = e.shipping_address.zone
+      this.address_1 = e.shipping_address.zone
+    },
+    address_1(e) {
+      if (!e.length) {
+       this.address_1 = 'не указан'
+      }
     }
   },
   methods: {
