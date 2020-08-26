@@ -6,8 +6,14 @@ import { store } from '../store';
 
 Vue.use(VueRouter)
 
+<<<<<<< HEAD
 const routes = [{
     path: '*',
+=======
+  const routes = [
+  {
+    path: '*/*',
+>>>>>>> 111d37463749be0186dbedd2da1a534ae855b857
     name: 'Home',
     component: Home,
     beforeEnter(from, to, next) {
