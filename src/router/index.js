@@ -6,13 +6,16 @@ import { store } from '../store';
 
 Vue.use(VueRouter)
 
+let data = process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : ''
+
+
   const routes = [
   {
     path: '*/*',
     name: 'Home',
     component: Home,
     beforeEnter(from, to, next) {
-      store.dispatch('products/loadItems');
+      store.dispatch('products/loadItems', data);
       next();
   }
   },
@@ -21,7 +24,7 @@ Vue.use(VueRouter)
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
+  routes,
 })
 
 export default router

@@ -165,10 +165,7 @@
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a
-                href="dostavka/"
-                target="_blank"
-              >по адресу склада</a> самовывоза, по предварительной
+              <a href="dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной
               договорённости с
               менеджером.
             </p>
@@ -342,11 +339,13 @@ export default {
         this.payment_method = "bank_transfer";
       }
     },
+    gerRualProductInCart(e) {
+      this.city = e.shipping_address.city
+    }
   },
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
-      console.log("какой то адрес", val);
       this.city = val.unrestricted_value;
     },
 
@@ -359,8 +358,6 @@ export default {
       });
     },
     selectRegion({ target }) {
-      console.log("смена региона", target.value);
-      // ${this.$root.base_url}
       let url = `${this.$root.base_url}index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
@@ -383,8 +380,7 @@ export default {
         : "form-group--error";
     },
     getRegions() {
-      let url =
-        `${this.$root.base_url}index.php?route=checkout/test/cart/regions`;
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/regions`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -413,27 +409,19 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        let url =
-          `${this.$root.base_url}index.php?route=checkout/test/order/save`;
-
-        let entity_type_org = {
+        let url = `${this.$root.base_url}index.php?route=checkout/test/order/save`;
+        let formValue = {
           // переключатели
           entity_type: this.entity_type,
           shipping_method: this.shipping_method,
-
+          city: this.city,
           // обязательные поля
           firstname: this.firstname,
           telephone: this.telephone,
           email: this.email,
-        };
-        let delivery_pickup = {
           // При доставке
-          city: this.city,
           zone_id: this.zone_id,
           address_1: this.address_1,
-        };
-
-        let legal = {
           // Для юредических лиц
           payment_method: this.payment_method,
           "organization[address]": this.address,
@@ -445,25 +433,8 @@ export default {
           "organization[bik]": this.bik,
           comment: this.comment,
         };
-        let itog = {};
-        itog = { ...entity_type_org };
-        if (
-          this.entity_type == "organization" &&
-          this.shipping_method != "flat.flat"
-        )
-          itog = { ...entity_type_org, ...legal };
-        else if (
-          this.entity_type != "organization" &&
-          this.shipping_method == "flat.flat"
-        )
-          itog = { ...entity_type_org, ...delivery_pickup };
-        else if (
-          this.entity_type == "organization" &&
-          this.shipping_method == "flat.flat"
-        )
-          itog = { ...entity_type_org, ...delivery_pickup, ...legal };
 
-        console.log("склеиная дата", itog);
+
         fetch(url, {
           method: "POST",
           credentials: "include",
@@ -472,7 +443,7 @@ export default {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: this.queryParams(itog),
+          body: this.queryParams(formValue),
         })
           .then((response) => {
             if (!response.ok) {

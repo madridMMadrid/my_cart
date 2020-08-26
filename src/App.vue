@@ -11,6 +11,11 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  & *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
   & .b_ttl {
     font-size: 30px;
     font-weight: 400;

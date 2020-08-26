@@ -85,8 +85,7 @@ export default {
         this.getProductsInCart.option[0].product_option_value,
       selected:
         this.getProductsInCart.option.length == 0 ||
-        this.getProductsInCart.option[0].product_option_value[0]
-          .product_option_value_id,
+        this.getProductsInCart.option[0].product_option_value_id,
       selectValue: null,
       qty: 0,
 
@@ -418,6 +417,8 @@ tr.wrapper_list.spinner {
     position: relative;
     white-space: nowrap;
     padding-right: 25px;
+    display: flex;
+    justify-content: flex-end;
     &:before {
       content: "РУБ";
       position: absolute;
