@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import App from './App.vue';
+import AppCart from './AppCart.vue'
 import AxiosPlugin from 'vue-axios-cors';
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -38,4 +39,9 @@ new Vue({
         base_url: (process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : '')
     },
     render: h => h(App)
+})
+new Vue({
+    el: '#js_header_cart',
+    store,
+    render: h => h(AppCart)
 })

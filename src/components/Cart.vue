@@ -23,7 +23,7 @@
     </div>
     <h3 class="total">
       Сумма:
-      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
+      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </h3>
 
     <form id="js_form_order" @submit.prevent="submit">
@@ -226,7 +226,7 @@
                     v-for="(val, i) in gerRualProductInCart.totals"
                     :key="i"
                     class="sup"
-                  >{{ val.text }} руб</span>
+                  >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }} руб</span>
                 </div>
               </div>
             </div>
@@ -298,6 +298,7 @@ export default {
       productToCategory: "",
       productLimit: "",
       selectOptions: {},
+      totalSumm: '',
 
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
@@ -309,6 +310,7 @@ export default {
   },
   computed: {
     ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
+
   },
   validations: {
     firstname: {
@@ -598,6 +600,9 @@ export default {
   padding: 1em;
   & select.multiple {
     opacity: 1;
+  }
+  & .resp-tab {
+    width: 100%;
   }
 
   .checkout-list {

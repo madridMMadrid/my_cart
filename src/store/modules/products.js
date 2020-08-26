@@ -1,5 +1,3 @@
-import { ListGroupPlugin } from "bootstrap-vue";
-
 export default {
     namespaced: true,
     state: {
