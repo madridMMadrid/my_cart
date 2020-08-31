@@ -347,7 +347,7 @@ export default {
       this.address_1 = e.shipping_address.zone
     },
     address_1(e) {
-      if (!e.length) {
+      if (e == undefined || !e.length) {
        this.address_1 = 'не указан'
       }
     }
@@ -367,7 +367,7 @@ export default {
       });
     },
     selectRegion({ target }) {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -389,7 +389,7 @@ export default {
         : "form-group--error";
     },
     getRegions() {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/regions`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/regions`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -418,7 +418,7 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        let url = `${this.$root.base_url}index.php?route=checkout/test/order/save`;
+        let url = `${this.$root.base_url}index.php?route=api/test/order/save`;
         let formValue = {
           // переключатели
           entity_type: this.entity_type,
@@ -493,7 +493,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/info`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/info`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -508,7 +508,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -525,7 +525,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `${this.$root.base_url}index.php?route=api/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -536,7 +536,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `${this.$root.base_url}index.php?route=checkout/test/cart/add`,
+        `${this.$root.base_url}index.php?route=api/test/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]

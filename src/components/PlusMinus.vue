@@ -8,11 +8,11 @@
         <div v-else class="lessPlus" @click="lessCaunt()">
           <div
             class="lessPlusArroy"
-            :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+            :style="{'background-image': `url('${this.$root.base_url}/catalog/view/javascript/skin/images/icons.png')`}"
           ></div>
         </div>
         <input
-          type="number"
+          type="text"
           min="1"
           class="product-card-buy-count-input"
           @change="addEvent"
@@ -26,7 +26,7 @@
         <div v-else class="morePlus" @click="moreCaunt()">
           <div
             class="morePlusArroy"
-            :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+            :style="{'background-image': `url('${this.$root.base_url}/catalog/view/javascript/skin/images/icons.png')`}"
           ></div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/edit`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
