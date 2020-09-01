@@ -3,7 +3,8 @@ export default {
     state: {
         realproduct: [],
         lengthProd: 0,
-        loader: true
+        loader: true,
+        test: 'dd'
     },
     getters: {
         gerRualProductInCart: state => state.realproduct,
@@ -27,16 +28,16 @@ export default {
     },
     actions: {
 
-        loadItems(store) {
-            let url =
-                "https://prime-wood.ru/index.php?route=checkout/test/cart/info";
+        loadItems(context) {
+            let data = process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : ''
+            let url = `${data}index.php?route=checkout/test/cart/info`;
             fetch(url, {
                 method: "GET",
                 credentials: 'include',
             })
                 .then((response) => response.json())
                 .then((json) => {
-                    store.commit('LOAD_ITEM', json);
+                    context.commit('LOAD_ITEM', json);
                 });
         },
 

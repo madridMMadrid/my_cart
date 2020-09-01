@@ -23,7 +23,7 @@
     </div>
     <h3 class="total">
       Сумма:
-      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text }}</span>
+      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </h3>
 
     <form id="js_form_order" @submit.prevent="submit">
@@ -165,10 +165,7 @@
           <div class="delivery_pickup_txt js_delivery_toggle" v-else>
             <p>
               Заказ вы можете забрать
-              <a
-                href="https://prime-wood.ru/dostavka/"
-                target="_blank"
-              >по адресу склада</a> самовывоза, по предварительной
+              <a href="dostavka/" target="_blank">по адресу склада</a> самовывоза, по предварительной
               договорённости с
               менеджером.
             </p>
@@ -229,7 +226,7 @@
                     v-for="(val, i) in gerRualProductInCart.totals"
                     :key="i"
                     class="sup"
-                  >{{ val.text }} руб</span>
+                  >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }} руб</span>
                 </div>
               </div>
             </div>
@@ -264,6 +261,7 @@ import {
 import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
+import { ListGroupPlugin } from 'bootstrap-vue';
 
 export default {
   data() {
@@ -290,7 +288,7 @@ export default {
       payment_method: "bank_transfer",
       optionsPaymont: [
         { value: "bank_transfer", text: "Безналичный расчет" },
-        { value: "cod", text: "Наличными курьеру", disabled: false },
+        { value: "cod", text: "Наличными курьеру" },
       ],
 
       submitStatus: null,
@@ -300,6 +298,7 @@ export default {
       productToCategory: "",
       productLimit: "",
       selectOptions: {},
+      totalSumm: '',
 
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
@@ -311,6 +310,7 @@ export default {
   },
   computed: {
     ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
+
   },
   validations: {
     firstname: {
@@ -332,25 +332,29 @@ export default {
   watch: {
     zone_id(id) {
       if (id == "2761" || id == "2722") {
-        this.optionsPaymont.forEach((item, i, arr) => {
-          if (item.value == "cod") {
-            this.optionsPaymont[i].disabled = false;
-          }
-        });
+        this.optionsPaymont.push({ value: "cod", text: "Наличными курьеру" });
       } else {
         this.optionsPaymont.forEach((item, i, arr) => {
           if (item.value == "cod") {
-            this.optionsPaymont[i].disabled = true;
+            this.optionsPaymont.splice(i, 1);
           }
         });
         this.payment_method = "bank_transfer";
       }
     },
+    gerRualProductInCart(e) {
+      this.city = e.shipping_address.zone
+      this.address_1 = e.shipping_address.zone
+    },
+    address_1(e) {
+      if (!e.length) {
+       this.address_1 = 'не указан'
+      }
+    }
   },
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
     getAdres(val) {
-      console.log("какой то адрес", val);
       this.city = val.unrestricted_value;
     },
 
@@ -363,8 +367,7 @@ export default {
       });
     },
     selectRegion({ target }) {
-      console.log("смена региона", target.value);
-      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -386,8 +389,7 @@ export default {
         : "form-group--error";
     },
     getRegions() {
-      let url =
-        "https://prime-wood.ru/index.php?route=checkout/test/cart/regions";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/regions`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -416,27 +418,19 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        let url =
-          "https://prime-wood.ru/index.php?route=checkout/test/order/save";
-
-        let entity_type_org = {
+        let url = `${this.$root.base_url}index.php?route=checkout/test/order/save`;
+        let formValue = {
           // переключатели
           entity_type: this.entity_type,
           shipping_method: this.shipping_method,
-
+          city: this.city,
           // обязательные поля
           firstname: this.firstname,
           telephone: this.telephone,
           email: this.email,
-        };
-        let delivery_pickup = {
           // При доставке
-          city: this.city,
           zone_id: this.zone_id,
           address_1: this.address_1,
-        };
-
-        let legal = {
           // Для юредических лиц
           payment_method: this.payment_method,
           "organization[address]": this.address,
@@ -448,25 +442,8 @@ export default {
           "organization[bik]": this.bik,
           comment: this.comment,
         };
-        let itog = {};
-        itog = { ...entity_type_org };
-        if (
-          this.entity_type == "organization" &&
-          this.shipping_method != "flat.flat"
-        )
-          itog = { ...entity_type_org, ...legal };
-        else if (
-          this.entity_type != "organization" &&
-          this.shipping_method == "flat.flat"
-        )
-          itog = { ...entity_type_org, ...delivery_pickup };
-        else if (
-          this.entity_type == "organization" &&
-          this.shipping_method == "flat.flat"
-        )
-          itog = { ...entity_type_org, ...delivery_pickup, ...legal };
 
-        console.log("склеиная дата", itog);
+
         fetch(url, {
           method: "POST",
           credentials: "include",
@@ -475,7 +452,7 @@ export default {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: this.queryParams(itog),
+          body: this.queryParams(formValue),
         })
           .then((response) => {
             if (!response.ok) {
@@ -516,7 +493,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/info";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/info`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -531,7 +508,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -548,7 +525,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `https://prime-wood.ru/index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `${this.$root.base_url}index.php?route=checkout/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -559,7 +536,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `https://prime-wood.ru/index.php?route=checkout/test/cart/add`,
+        `${this.$root.base_url}index.php?route=checkout/test/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]
@@ -623,6 +600,9 @@ export default {
   padding: 1em;
   & select.multiple {
     opacity: 1;
+  }
+  & .resp-tab {
+    width: 100%;
   }
 
   .checkout-list {

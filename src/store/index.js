@@ -9,5 +9,5 @@ export const store = new Vuex.Store({
     modules: {
         products,
     },
-    strict: process.env.NODE_ENV !== 'production'
+    strict: process.env.NODE_ENV !== 'production', 
 })

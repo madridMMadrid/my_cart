@@ -5,7 +5,7 @@
     </td>
     <td class="wrap_product-name">
       <div class="product-name">
-        <router-link to="/" tag="a">{{ getProductsInCart.name }}</router-link>
+        <a :href="getProductsInCart.href">{{ getProductsInCart.name }}</a>
         <ul class="chars_list">
           <li>
             <span class="bold">Артикул:</span>
@@ -15,21 +15,25 @@
             <span class="bold">Размер:</span>
             <span class="dimensions">
               <i>↔</i>
-              {{getProductsInCart.proportions.width}}
-              <i class="width">↔</i>
               {{getProductsInCart.proportions.length}}
+              <i class="width">↔</i>
+              {{getProductsInCart.proportions.width}}
               <i>↕</i>
               {{getProductsInCart.proportions.height}}
             </span>
           </li>
           <li class="char_list_material" v-if="getProductsInCart.option.length != 0">
-            <div class="bold" v-for="(val, i) in getProductsInCart.option" :key="i">{{val.name}}:</div>
+            <div
+              class="bold"
+              v-for="(val, i) in getProductsInCart.option"
+              :key="i + val.product_option_value_id"
+            >{{val.name}}:</div>
             <div class="select">
-              <select v-model="selected" class="select-css">
+              <select v-model="selected" class="select-css multiple">
                 <option
                   v-for="(val, i) in options"
                   :value="val.product_option_value_id"
-                  :key="i"
+                  :key="i+val.product_option_value_id"
                   :style="`background-image:url(${val.image});`"
                 >{{ val.name }}</option>
               </select>
@@ -45,7 +49,7 @@
     </td>
     <td class="micro_size">
       <div class="currentSum">
-        <div>{{ getProductsInCart.price }}</div>
+        <div>{{ getProductsInCart.price.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</div>
       </div>
     </td>
     <td class="micro_size">
@@ -53,14 +57,21 @@
         :price="getProductsInCart.price"
         :qty="+getProductsInCart.quantity"
         :AllInfoForProduct="getProductsInCart"
+        :selectValue="selectValue"
         @emitQty="sumQty"
       />
     </td>
     <td class="micro_size">
-      <span class="product-price">{{ getProductsInCart.total }}</span>
+      <span
+        class="product-price"
+      >{{ getProductsInCart.total.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </td>
     <td class="closed">
-      <button class="product-remove" @click="remove(getProductsInCart.cart_id)">X</button>
+      <button
+        class="product-remove"
+        :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+        @click="remove(getProductsInCart.cart_id)"
+      ></button>
     </td>
   </tr>
 </template>
@@ -85,8 +96,7 @@ export default {
         this.getProductsInCart.option[0].product_option_value,
       selected:
         this.getProductsInCart.option.length == 0 ||
-        this.getProductsInCart.option[0].product_option_value[0]
-          .product_option_value_id,
+        this.getProductsInCart.option[0].product_option_value_id,
       selectValue: null,
       qty: 0,
 
@@ -122,7 +132,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/edit";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
@@ -161,8 +171,7 @@ export default {
         });
     },
     remove(id) {
-      let url =
-        "https://prime-wood.ru/index.php?route=checkout/test/cart/remove";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/remove`;
       let data = { key: id };
 
       fetch(url, {
@@ -209,7 +218,7 @@ tr.wrapper_list.spinner {
   & td {
     padding: 15px 10px;
     &:first-child {
-      padding: 5px;
+      padding: 16px 5px;
     }
   }
 }
@@ -263,6 +272,7 @@ tr.wrapper_list.spinner {
 .wrapper_list.spinner {
   & .status {
     white-space: nowrap;
+    font-size: 12px;
 
     &:before {
       content: "";
@@ -318,28 +328,34 @@ tr.wrapper_list.spinner {
           &.select-css {
             display: block;
             width: 100%;
-            padding: 2px 15px 2px 10px;
+            padding: 2px 1px 2px 1px;
+            margin-left: 10px;
             background: none;
             border: none;
-            border-radius: 3px;
+            border-radius: 0;
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
             font-family: inherit;
-            font-size: 1rem;
-            color: #444;
+            font-size: 1em;
+            color: #595959;
+            box-shadow: none;
+            border-bottom: 1px dotted #56504c;
+            &:focus {
+              outline: none;
+            }
           }
         }
         &:after {
           content: "";
           display: block;
           border-style: solid;
-          border-width: 6px 5px 0 5px;
-          border-color: #000 transparent transparent transparent;
+          border-width: 4px 4px 0 4px;
+          border-color: #595959 transparent transparent transparent;
           pointer-events: none;
           position: absolute;
           top: 50%;
-          right: 5px;
+          right: -19px;
           z-index: 1;
           margin-top: -3px;
         }
@@ -417,6 +433,8 @@ tr.wrapper_list.spinner {
     position: relative;
     white-space: nowrap;
     padding-right: 25px;
+    display: flex;
+    justify-content: flex-end;
     &:before {
       content: "РУБ";
       position: absolute;
@@ -428,7 +446,7 @@ tr.wrapper_list.spinner {
   & .currentSum {
     font-size: 20px;
     font-weight: bold;
-    color: #888;
+    color: #595959;
     display: flex;
     margin: auto;
     justify-content: center;
@@ -450,9 +468,10 @@ tr.wrapper_list.spinner {
     height: 25px;
     border-radius: 50%;
     border: 0;
-    background-color: #e0e0e0;
+    background-color: transparent;
     color: #fff;
     cursor: pointer;
+    background-position: -58px -78px;
   }
 }
 </style>  

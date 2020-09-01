@@ -5,7 +5,12 @@
         <div v-if="lessDisabled" class="lessPlus disabled">
           <b-spinner small label="Small Spinner"></b-spinner>
         </div>
-        <div v-else class="lessPlus" @click="lessCaunt()"></div>
+        <div v-else class="lessPlus" @click="lessCaunt()">
+          <div
+            class="lessPlusArroy"
+            :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+          ></div>
+        </div>
         <input
           type="number"
           min="1"
@@ -18,7 +23,12 @@
         <div v-if="moreDisabled" class="morePlus disabled">
           <b-spinner small label="Small Spinner"></b-spinner>
         </div>
-        <div v-else class="morePlus" @click="moreCaunt()"></div>
+        <div v-else class="morePlus" @click="moreCaunt()">
+          <div
+            class="morePlusArroy"
+            :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+          ></div>
+        </div>
       </div>
     </div>
   </div>
@@ -29,7 +39,7 @@ import { log } from "util";
 import { store } from "../store";
 
 export default {
-  props: ["price", "qty", "AllInfoForProduct"],
+  props: ["price", "qty", "AllInfoForProduct", "selectValue"],
   data() {
     return {
       summa: this.qty,
@@ -44,6 +54,7 @@ export default {
         this.AllInfoForProduct.option[0].product_option_value_id,
       moreDisabled: false,
       lessDisabled: false,
+      selectValueData: this.selectValue,
     };
   },
   watch: {
@@ -63,7 +74,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: target.value,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
       });
     },
     queryParams(params) {
@@ -82,7 +93,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = "https://prime-wood.ru/index.php?route=checkout/test/cart/edit";
+      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
@@ -139,7 +150,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: this.summa,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
         inerator: 1,
       });
     },
@@ -155,7 +166,7 @@ export default {
         product_id: this.product_id,
         cart_id: this.cart_id,
         qty: this.summa,
-        option: obj,
+        option: this.selectValueData == null ? this.selectValueData : obj,
         inerator: 0,
       });
     },
@@ -184,8 +195,9 @@ export default {
         display: flex;
         & .morePlus,
         .lessPlus {
-          width: 25px;
-          background: #c5c4c4;
+          width: 18px;
+          height: 28px;
+          background: #e7e5d9;
           line-height: 0.9;
           -webkit-touch-callout: none; /* iOS Safari */
           -webkit-user-select: none; /* Chrome/Safari/Opera */
@@ -211,8 +223,14 @@ export default {
             cursor: not-allowed;
             display: flex;
           }
-          &:before {
-            content: "+";
+          & .morePlusArroy {
+            height: 7px;
+            margin: -4px 0 0 -5px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            background-position: -85px -62px;
           }
         }
         & .lessPlus {
@@ -220,8 +238,14 @@ export default {
             cursor: not-allowed;
             display: flex;
           }
-          &:before {
-            content: "-";
+          & .lessPlusArroy {
+            height: 7px;
+            margin: -4px 0 0 -5px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            background-position: -85px -71px;
           }
         }
       }
@@ -322,6 +346,7 @@ export default {
   }
   & .product-card-buy-count-input {
     max-width: 30px;
+    height: 28px;
     padding: 5px;
     border: 1px solid #e2e0d3;
     text-align: center;
