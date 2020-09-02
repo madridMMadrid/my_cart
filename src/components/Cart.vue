@@ -480,6 +480,7 @@ export default {
           })
           .then((data) => {
             this.submitStatus = "OK";
+            window.location = `${this.$root.base_url}index.php?route=checkout/success`
           })
           .catch((error) => {
             console.log("что то пошло не так", error);

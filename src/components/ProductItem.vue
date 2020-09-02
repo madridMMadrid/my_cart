@@ -378,6 +378,7 @@ tr.wrapper_list.spinner {
     position: relative;
     &.wrapper_list {
       display: inline-block;
+      width: 100%;
     }
     & td {
       display: flex;
@@ -562,6 +563,9 @@ tr.wrapper_list.spinner {
   & .product-name {
     box-sizing: border-box;
     text-align: left;
+     @media screen and (max-width: 600px) {
+       width: 100%;
+     }
     & a {
       color: #ff9e23;
       text-decoration: underline;
