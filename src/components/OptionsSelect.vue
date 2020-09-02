@@ -1,10 +1,5 @@
 <template>
   <div class="custom_select" :data-state="index" :class="{active: isActive}">
-    <!-- <div
-      class="__select"
-      :class="{active: isActive}"
-     
-    ></div>-->
     <div
       class="__select__title"
       data-default="Option 0"
@@ -77,22 +72,15 @@ export default {
   },
   methods: {
     openSelectOptions(e, i) {
-      // console.log(e, i, this.index)
-      // if (i == this.index) {
       this.isActive = !this.isActive;
-      console.log("вызов функции");
-      // }
     },
     activeValueCheckOptions(i, index) {
-      console.log();
       let id = this.options.find((x) => x.product_option_value_id == i).name;
       this.selectOptionsName = id;
-      // this.activeValueOptions = "";
 
       let searchTerm = i;
       let obj = {};
       obj[+this.one] = +searchTerm;
-      console.log(i, "вызов activeValueCheckOptions");
       if (index == this.index) {
         this.isActive = !this.isActive;
       }
@@ -187,7 +175,7 @@ export default {
 
 .custom_select {
   width: 100%;
-  @for $i from 0 through 30 {
+  @for $i from 0 through 40 {
     &.active {
       &[data-state="#{$i}"] {
         & .__select__content {
@@ -197,13 +185,24 @@ export default {
       }
     }
   }
+  &.active {
+    & .__select__title {
+      &::before {
+        transform: translate(-3px, -50%) rotate(-45deg);
+      }
+
+      &::after {
+        transform: translate(3px, -50%) rotate(45deg);
+      }
+    }
+  }
 }
 .__select__title {
   display: flex;
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 2px 6px;
+  padding: 2px 30px 2px 6px;
   border-radius: 5px;
 
   cursor: pointer;
@@ -213,7 +212,7 @@ export default {
     content: "";
     position: absolute;
     top: 50%;
-    right: -18px;
+    right: 9px;
     display: block;
     width: 10px;
     height: 2px;
@@ -247,21 +246,16 @@ export default {
   position: absolute;
   top: 37px;
   left: 3px;
-
   display: flex;
   flex-direction: column;
   width: calc(100% - 6px);
-
   background-color: #ffffff;
-
   border: 1px solid #c7ccd1;
   border-top: none;
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-
   transition: all 0.3s ease-out;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.34);
-
   opacity: 0;
   visibility: hidden;
   z-index: 9;
@@ -294,14 +288,10 @@ export default {
     position: absolute;
     width: 34px;
     height: 34px;
-    background: red;
     border-radius: 100%;
     left: 5px;
     border: 3px solid #e1e0e0;
-  }
-
-  & + input + & {
-    border-top: 0 solid #c7ccd160;
+    background-position: 1px;
   }
 }
 </style>

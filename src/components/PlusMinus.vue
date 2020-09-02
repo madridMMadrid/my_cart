@@ -177,7 +177,7 @@ export default {
 .wrapperPlusMinus {
   & .spinner-border {
     width: 20px;
-    height: 20px;
+    height: 18px;
     border-width: 2px;
     margin: auto;
   }
