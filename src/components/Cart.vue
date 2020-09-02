@@ -752,6 +752,8 @@ export default {
 .order_info .total_order_price .sup {
   top: -8px;
   padding-right: 35px;
+  font-size: 35px;
+  font-weight: 700;
   position: relative;
   &::after {
     content: "РУБ";

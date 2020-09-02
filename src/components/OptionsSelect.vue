@@ -260,6 +260,10 @@ export default {
   visibility: hidden;
   z-index: 9;
   min-width: 215px;
+
+  @media screen and (max-width: 600px) {
+    top: 52px;
+  }
 }
 .__select__input {
   display: none;

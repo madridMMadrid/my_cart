@@ -1,9 +1,6 @@
 import Vue from 'vue';
 import App from './App.vue';
-import AppCart from './AppCart.vue'
-import AxiosPlugin from 'vue-axios-cors';
-import axios from 'axios'
-import VueAxios from 'vue-axios'
+import AppCart from './AppCart.vue';
 
 import { store } from './store';
 import router from './router';
@@ -19,8 +16,6 @@ Vue.use(VueMask)
 
 Vue.use(VueDadata)
 Vue.use(Vuelidate)
-Vue.use(AxiosPlugin)
-Vue.use(VueAxios, axios)
 
 
 // Install BootstrapVue

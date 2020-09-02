@@ -29,53 +29,6 @@
               :key="i + val.product_option_value_id"
             >{{val.name}}:</div>
             <div class="select">
-              <!-- <select v-model="selected" class="select-css multiple">
-                <option
-                  v-for="(val, i) in options"
-                  :value="val.product_option_value_id"
-                  :key="i+val.product_option_value_id"
-                  :style="`background-image:url(${val.image});`"
-                >{{ val.name }}</option>
-              </select> -->
-              <!-- <div
-                class="__select"
-                :data-state="activeValueOptions + index"
-                @click="openSelectOptions($event, index)"
-              >
-                <div class="__select__title" data-default="Option 0">{{ selectOptionsName }}</div>
-                <div class="__select__content">
-                  <input
-                    id="singleSelectOptions0"
-                    class="__select__input"
-                    type="radio"
-                    name="singleSelect"
-                    checked
-                  />
-                  <template v-for="(rule, i) in options">
-                    <input
-                      :id="'singleSelectOptions0'+i"
-                      class="__select__input"
-                      type="radio"
-                      name="singleSelect"
-                      :key="'singleSelectOptions0'+i"
-                      :value="rule.product_option_value_id"
-                      v-model="selected"
-                    />
-                    <label
-                      :key="'singleSelectOptions1'+i"
-                      :for="'singleSelectOptions0'+i"
-                      class="__select__label"
-                      @click="activeValueCheckOptions($event, rule.product_option_value_id, index)"
-                    >
-                      <span
-                        :style="`background-image:url(${rule.image});`"
-                        class="__select__label_img"
-                      ></span>
-                      {{rule.name}}
-                    </label>
-                  </template>
-                </div>
-              </div> -->
               <OptionsSelect :getProductsInCart="getProductsInCart" :index="index" :qty="qty" />
             </div>
           </li>
@@ -427,7 +380,8 @@ tr.wrapper_list.spinner {
       display: inline-block;
     }
     & td {
-      display: inline-block;
+      display: flex;
+      justify-content: center;
       &.wrap_inStorage {
         padding: 0;
       }
@@ -504,6 +458,9 @@ tr.wrapper_list.spinner {
     flex-direction: column;
     list-style: none;
     padding-left: 0;
+    @media screen and (max-width: 600px) {
+      font-size: 17px;
+    }
     & li {
       align-items: center;
     }
@@ -519,6 +476,10 @@ tr.wrapper_list.spinner {
     }
     & .char_list_material {
       display: flex;
+
+      @media screen and (max-width: 600px) {
+        font-size: 30px;
+      }
       & .select {
         position: relative;
         & select {
@@ -606,6 +567,11 @@ tr.wrapper_list.spinner {
       text-decoration: underline;
       cursor: pointer;
       font-size: 13px;
+      @media screen and (max-width: 600px) {
+        font-size: 21px;
+        display: block;
+        margin-bottom: 12px;
+      }
     }
   }
 
@@ -619,12 +585,19 @@ tr.wrapper_list.spinner {
     padding-right: 25px;
     display: flex;
     justify-content: flex-end;
+    @media screen and (max-width: 600px) {
+      font-size: 40px;
+    }
     &:before {
       content: "РУБ";
       position: absolute;
       top: -1px;
       right: 0;
       font-size: 10px;
+      @media screen and (max-width: 600px) {
+        right: -12px;
+        font-size: 17px;
+      }
     }
   }
   & .currentSum {
@@ -634,6 +607,9 @@ tr.wrapper_list.spinner {
     display: flex;
     margin: auto;
     justify-content: center;
+    @media screen and (max-width: 600px) {
+      font-size: 40px;
+    }
     & > div {
       position: relative;
       padding-right: 25px;
@@ -643,6 +619,10 @@ tr.wrapper_list.spinner {
         top: 4px;
         right: 0;
         font-size: 10px;
+        @media screen and (max-width: 600px) {
+          right: -11px;
+          font-size: 17px;
+        }
       }
     }
   }
