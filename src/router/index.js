@@ -22,7 +22,7 @@ let data = process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : ''
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes,
 })
