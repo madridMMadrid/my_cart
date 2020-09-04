@@ -819,6 +819,7 @@ export default {
 .form-control,
 #js_select_zone {
   margin-bottom: 10px;
+  padding: 0 10px;
   width: 250px;
   height: 30px;
 }
