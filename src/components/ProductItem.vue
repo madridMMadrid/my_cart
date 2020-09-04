@@ -29,14 +29,54 @@
               :key="i + val.product_option_value_id"
             >{{val.name}}:</div>
             <div class="select">
-              <select v-model="selected" class="select-css multiple">
+              <!-- <select v-model="selected" class="select-css multiple">
                 <option
                   v-for="(val, i) in options"
                   :value="val.product_option_value_id"
                   :key="i+val.product_option_value_id"
                   :style="`background-image:url(${val.image});`"
                 >{{ val.name }}</option>
-              </select>
+              </select> -->
+              <!-- <div
+                class="__select"
+                :data-state="activeValueOptions + index"
+                @click="openSelectOptions($event, index)"
+              >
+                <div class="__select__title" data-default="Option 0">{{ selectOptionsName }}</div>
+                <div class="__select__content">
+                  <input
+                    id="singleSelectOptions0"
+                    class="__select__input"
+                    type="radio"
+                    name="singleSelect"
+                    checked
+                  />
+                  <template v-for="(rule, i) in options">
+                    <input
+                      :id="'singleSelectOptions0'+i"
+                      class="__select__input"
+                      type="radio"
+                      name="singleSelect"
+                      :key="'singleSelectOptions0'+i"
+                      :value="rule.product_option_value_id"
+                      v-model="selected"
+                    />
+                    <label
+                      :key="'singleSelectOptions1'+i"
+                      :for="'singleSelectOptions0'+i"
+                      class="__select__label"
+                      @click="activeValueCheckOptions($event, rule.product_option_value_id, index)"
+                    >
+                      <span
+                        :style="`background-image:url(${rule.image});`"
+                        class="__select__label_img"
+                      ></span>
+                      {{rule.name}}
+                    </label>
+                  </template>
+                </div>
+              </div> -->
+              <OptionsSelect :getProductsInCart="getProductsInCart" :index="index" :qty="qty" />
             </div>
           </li>
         </ul>
@@ -69,7 +109,7 @@
     <td class="closed">
       <button
         class="product-remove"
-        :style="{'background-image': `url(${require('@/assets/icons.png')}) `}"
+        :style="{'background-image': `url('${this.$root.base_url}/catalog/view/javascript/skin/images/icons.png')`}"
         @click="remove(getProductsInCart.cart_id)"
       ></button>
     </td>
@@ -79,13 +119,16 @@
 import { mapActions } from "vuex";
 
 import PlusMinus from "./PlusMinus";
+import OptionsSelect from "./OptionsSelect";
 import { log } from "util";
 import { store } from "../store";
+import { ListGroupPlugin } from "bootstrap-vue";
 
 export default {
   props: ["getProductsInCart", "index"],
   components: {
     PlusMinus,
+    OptionsSelect,
   },
   data() {
     return {
@@ -107,12 +150,31 @@ export default {
       two:
         this.getProductsInCart.option.length == 0 ||
         this.getProductsInCart.option[0].product_option_value_id,
+
+      selectOptions: "",
+      activeValueOptions: false,
+      selectOptionsName:
+        this.getProductsInCart.option.length == 0 ||
+        this.getProductsInCart.option[0].value,
     };
   },
   created() {},
   computed: {},
   methods: {
     ...mapActions("products", ["removeProduct"]),
+    openSelectOptions(e) {
+      // e.preventDefault()
+      if (!this.activeValueOptions) {
+        this.activeValueOptions = "activeValueOptions";
+      } else {
+        this.activeValueOptions = "";
+      }
+    },
+    activeValueCheckOptions(e, i) {
+      let id = this.options.find((x) => x.product_option_value_id == i).name;
+      this.selectOptionsName = id;
+      this.activeValueOptions = "";
+    },
     sumQty(e) {
       this.qty = e;
     },
@@ -132,7 +194,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/edit`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
@@ -171,7 +233,7 @@ export default {
         });
     },
     remove(id) {
-      let url = `${this.$root.base_url}index.php?route=checkout/test/cart/remove`;
+      let url = `${this.$root.base_url}index.php?route=api/test/cart/remove`;
       let data = { key: id };
 
       fetch(url, {
@@ -197,6 +259,7 @@ export default {
       let searchTerm = e;
       let obj = {};
       obj[+this.one] = +searchTerm;
+
       this.selectValue = obj;
       this.editProductToCart({
         product_id: this.product_id,
@@ -209,7 +272,141 @@ export default {
   },
 };
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
+.__select {
+  position: relative;
+  width: 100%;
+  height: 26px;
+  margin: 0 auto;
+  @for $i from 1 through 3 {
+    &[data-state="activeValueOptions#{$i}"] {
+      .__select__title {
+        &::before {
+          transform: translate(-3px, -50%) rotate(-45deg);
+        }
+
+        &::after {
+          transform: translate(3px, -50%) rotate(45deg);
+        }
+      }
+
+      .__select__content {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .__select__label + .__select__input + .__select__label {
+        min-height: 40px;
+        border-top-width: 1px;
+      }
+    }
+  }
+}
+.__select__title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 2px 6px;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    display: block;
+    width: 10px;
+    height: 2px;
+    transition: all 0.3s ease-out;
+    background-color: #333333;
+    transform: translate(-3px, -50%) rotate(45deg);
+  }
+  &::after {
+    transform: translate(3px, -50%) rotate(-45deg);
+  }
+}
+.reset {
+  display: flex;
+  width: 230px;
+  padding: 8px 16px;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  border: solid 1px #c7ccd1;
+  border-radius: 5px;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: #333333;
+  &:hover {
+    background-color: #d8093a;
+    color: #ffffff;
+  }
+}
+.__select__content {
+  position: absolute;
+  top: 37px;
+  left: 3px;
+
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 6px);
+
+  background-color: #ffffff;
+
+  border: 1px solid #c7ccd1;
+  border-top: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  transition: all 0.3s ease-out;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.34);
+
+  opacity: 0;
+  visibility: hidden;
+  z-index: 9;
+}
+.__select__input {
+  display: none;
+
+  &:checked + label {
+    background-color: #dedede;
+  }
+  &:disabled + label {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+.__select__label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 46px;
+  padding: 0px 16px 0px 45px;
+  transition: all 0.2s ease-out;
+  overflow: hidden;
+  font-size: 13px;
+  margin: 0;
+  position: relative;
+  & .__select__label_img {
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    background: red;
+    border-radius: 100%;
+    left: 5px;
+    border: 3px solid #e1e0e0;
+  }
+
+  & + input + & {
+    border-top: 0 solid #c7ccd160;
+  }
+}
 tr.wrapper_list.spinner {
   border-top: 1px solid #d6d5cc;
   &:last-child {
@@ -345,19 +542,6 @@ tr.wrapper_list.spinner {
               outline: none;
             }
           }
-        }
-        &:after {
-          content: "";
-          display: block;
-          border-style: solid;
-          border-width: 4px 4px 0 4px;
-          border-color: #595959 transparent transparent transparent;
-          pointer-events: none;
-          position: absolute;
-          top: 50%;
-          right: -19px;
-          z-index: 1;
-          margin-top: -3px;
         }
       }
       & .custom-select {
