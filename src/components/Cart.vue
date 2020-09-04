@@ -22,8 +22,11 @@
       <b-spinner variant="success" type="grow" label="Spinning"></b-spinner>
     </div>
     <h3 class="total">
-      Сумма:
-      <span v-for="(val, i) in gerRualProductInCart.totals" :key="i">{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
+      <span class="total_itog">Итого</span>
+      <span
+        v-for="(val, i) in gerRualProductInCart.totals"
+        :key="i"
+      >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </h3>
 
     <form id="js_form_order" @submit.prevent="submit">
@@ -226,7 +229,7 @@
                     v-for="(val, i) in gerRualProductInCart.totals"
                     :key="i"
                     class="sup"
-                  >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }} руб</span>
+                  >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
                 </div>
               </div>
             </div>
@@ -261,7 +264,7 @@ import {
 import ProductItem from "./ProductItem";
 import { log } from "util";
 import { store } from "../store";
-import { ListGroupPlugin } from 'bootstrap-vue';
+import { ListGroupPlugin } from "bootstrap-vue";
 
 export default {
   data() {
@@ -298,7 +301,7 @@ export default {
       productToCategory: "",
       productLimit: "",
       selectOptions: {},
-      totalSumm: '',
+      totalSumm: "",
 
       reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
       emptyEmail: false,
@@ -310,7 +313,6 @@ export default {
   },
   computed: {
     ...mapGetters("products", ["gerRualProductInCart", "lp", "loader"]),
-
   },
   validations: {
     firstname: {
@@ -332,7 +334,16 @@ export default {
   watch: {
     zone_id(id) {
       if (id == "2761" || id == "2722") {
-        this.optionsPaymont.push({ value: "cod", text: "Наличными курьеру" });
+        this.optionsPaymont.forEach((item, i, arr) => {
+          if (item.value == "cod") {
+            this.optionsPaymont.splice(i, 1);
+          } else {
+            this.optionsPaymont.push({
+              value: "cod",
+              text: "Наличными курьеру",
+            });
+          }
+        });
       } else {
         this.optionsPaymont.forEach((item, i, arr) => {
           if (item.value == "cod") {
@@ -343,14 +354,14 @@ export default {
       }
     },
     gerRualProductInCart(e) {
-      this.city = e.shipping_address.zone
-      this.address_1 = e.shipping_address.zone
+      this.city = e.shipping_address.zone;
+      this.address_1 = e.shipping_address.zone;
     },
     address_1(e) {
       if (e == undefined || !e.length) {
-       this.address_1 = 'не указан'
+        this.address_1 = "не указан";
       }
-    }
+    },
   },
   methods: {
     ...mapActions("products", ["removeProduct", "removeProductAll"]),
@@ -443,7 +454,6 @@ export default {
           comment: this.comment,
         };
 
-
         fetch(url, {
           method: "POST",
           credentials: "include",
@@ -470,6 +480,7 @@ export default {
           })
           .then((data) => {
             this.submitStatus = "OK";
+            window.location = `${this.$root.base_url}index.php?route=checkout/success`
           })
           .catch((error) => {
             console.log("что то пошло не так", error);
@@ -610,11 +621,17 @@ export default {
   }
 
   .total {
-    font-size: 2em;
+    font-size: 40px;
     font-weight: bold;
     align-self: flex-end;
     position: relative;
     padding-right: 38px;
+    color: #ff9e24;
+    &_itog {
+      color: #595959;
+      font-size: 30px;
+      font-weight: normal;
+    }
 
     &::before {
       content: "РУБ";
@@ -734,8 +751,18 @@ export default {
 }
 
 .order_info .total_order_price .sup {
-  font-size: 22px;
   top: -8px;
+  padding-right: 35px;
+  font-size: 35px;
+  font-weight: 700;
+  position: relative;
+  &::after {
+    content: "РУБ";
+    position: absolute;
+    top: 4px;
+    right: 0;
+    font-size: 16px;
+  }
 }
 
 .payment_select {

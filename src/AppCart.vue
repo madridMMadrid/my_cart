@@ -1,7 +1,7 @@
 <template>
   <div class="basket">
     <a :href="`${data}index.php?route=checkout/test/cart`" class="bcount">
-      <span id="bcount">{{gerRualProductInCart.product_total}}</span>
+      <span id="bcount">{{gerRualProductInCart.product_total}} </span>
       <span id="bcount_str">товаров</span>
     </a>
     <div class="bsum">

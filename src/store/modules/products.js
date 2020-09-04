@@ -4,7 +4,6 @@ export default {
         realproduct: [],
         lengthProd: 0,
         loader: true,
-        test: 'dd'
     },
     getters: {
         gerRualProductInCart: state => state.realproduct,

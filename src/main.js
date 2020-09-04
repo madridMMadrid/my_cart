@@ -1,9 +1,7 @@
 import Vue from 'vue';
 import App from './App.vue';
-import AppCart from './AppCart.vue'
-import AxiosPlugin from 'vue-axios-cors';
-import axios from 'axios'
-import VueAxios from 'vue-axios'
+import AppCart from './AppCart.vue';
+import AppMiniCart from './AppMiniCart.vue';
 
 import { store } from './store';
 import router from './router';
@@ -19,8 +17,6 @@ Vue.use(VueMask)
 
 Vue.use(VueDadata)
 Vue.use(Vuelidate)
-Vue.use(AxiosPlugin)
-Vue.use(VueAxios, axios)
 
 
 // Install BootstrapVue
@@ -29,7 +25,7 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
     // import VueCarousel from '@chenfengyuan/vue-carousel';
 Vue.use(BootstrapVueIcons)
-// Vue.config.devtools = true
+    // Vue.config.devtools = true
 
 new Vue({
     el: '#incredibleBasketApp',
@@ -44,4 +40,9 @@ new Vue({
     el: '#js_header_cart',
     store,
     render: h => h(AppCart)
+})
+new Vue({
+    el: '#js_mob_cart_count',
+    store,
+    render: h => h(AppMiniCart)
 })
