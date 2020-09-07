@@ -378,7 +378,7 @@ export default {
       });
     },
     selectRegion({ target }) {
-      let url = `${this.$root.base_url}index.php?route=api/test/cart/changeRegion&zone_id=${target.value}`;
+      let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/changeRegion&zone_id=${target.value}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -400,7 +400,7 @@ export default {
         : "form-group--error";
     },
     getRegions() {
-      let url = `${this.$root.base_url}index.php?route=api/test/cart/regions`;
+      let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/regions`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -429,7 +429,7 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        let url = `${this.$root.base_url}index.php?route=api/test/order/save`;
+        let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/order/save`;
         let formValue = {
           // переключатели
           entity_type: this.entity_type,
@@ -480,7 +480,7 @@ export default {
           })
           .then((data) => {
             this.submitStatus = "OK";
-            // window.location = `${this.$root.base_url}index.php?route=checkout/success`
+            window.location = `${this.$root.base_url}index.php?route=checkout/success`
           })
           .catch((error) => {
             console.log("что то пошло не так", error);
@@ -504,7 +504,7 @@ export default {
     },
 
     checkedProduct() {
-      let url = `${this.$root.base_url}index.php?route=api/test/cart/info`;
+      let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/info`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -519,7 +519,7 @@ export default {
       this.selectOptions[productId] = option;
     },
     getProd() {
-      let url = `${this.$root.base_url}index.php?route=api/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
+      let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`;
       fetch(url, {
         method: "GET",
         credentials: "include",
@@ -536,7 +536,7 @@ export default {
     loadProducts() {
       this.makeAjax(
         "GET",
-        `${this.$root.base_url}index.php?route=api/test/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
+        `${this.$root.base_url}index.php?route=checkout/vue/cart/productsToCategory&category=${this.productToCategory}&limit=${this.productLimit}`,
         "",
         (response) => {
           this.categoryTotal = response.total || 0;
@@ -547,7 +547,7 @@ export default {
     timAddProductToCart(product_id) {
       this.makeAjax(
         "POST",
-        `${this.$root.base_url}index.php?route=api/test/cart/add`,
+        `${this.$root.base_url}index.php?route=checkout/vue/cart/add`,
         "product_id=" +
           product_id +
           (this.selectOptions[product_id]

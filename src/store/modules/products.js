@@ -29,7 +29,7 @@ export default {
 
         loadItems(context) {
             let data = process.env.NODE_ENV !== 'production' ? 'https://prime-wood.ru/' : ''
-            let url = `${data}index.php?route=api/test/cart/info`;
+            let url = `${data}index.php?route=checkout/vue/cart/info`;
             fetch(url, {
                 method: "GET",
                 credentials: 'include',

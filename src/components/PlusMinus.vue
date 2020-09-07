@@ -93,7 +93,7 @@ export default {
       return query;
     },
     editProductToCart(data) {
-      let url = `${this.$root.base_url}index.php?route=api/test/cart/edit`;
+      let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/edit`;
       var data = {
         product_id: data.product_id,
         quantity: data.qty,
