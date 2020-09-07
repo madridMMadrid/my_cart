@@ -29,7 +29,7 @@
       >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </h3>
 
-    <form id="js_form_order" @submit.prevent="submit">
+    <form v-if="lp != 0" id="js_form_order" @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
 
@@ -132,7 +132,7 @@
                 value="pickup.pickup"
                 v-model="shipping_method"
               />
-              <label for="color-4">Свмовывоз</label>
+              <label for="color-4">Самовывоз</label>
             </div>
           </div>
 
@@ -429,7 +429,7 @@ export default {
       } else {
         this.emptyEmail = false;
         this.submitStatus = "PENDING";
-        let url = `${this.$root.base_url}index.php?route=checkout/vue/cart/order/save`;
+        let url = `${this.$root.base_url}index.php?route=checkout/vue/order/save`;
         let formValue = {
           // переключатели
           entity_type: this.entity_type,
@@ -480,7 +480,20 @@ export default {
           })
           .then((data) => {
             this.submitStatus = "OK";
-            window.location = `${this.$root.base_url}index.php?route=checkout/success`
+            let url = data.confirm;
+            let redirect = data.redirect 
+            console.log(data)
+            fetch(url, {
+              method: "GET",
+              credentials: "include",
+              withCredentials: true,
+              cache: "no-store"
+            })
+              .then((response) => response.json())
+              .then((json) => {
+                window.location = redirect
+                store.dispatch("products/loadItems");
+              });
           })
           .catch((error) => {
             console.log("что то пошло не так", error);
