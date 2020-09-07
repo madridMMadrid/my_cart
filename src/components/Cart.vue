@@ -29,6 +29,7 @@
       >{{ val.text.toString().replace(/(\d{1,3})(?=((\d{3})*)$)/g, " $1") }}</span>
     </h3>
 
+
     <form v-if="lp != 0" id="js_form_order" @submit.prevent="submit">
       <div class="order_block form_border_style clearfix">
         <div class="b_ttl">Оформление заказа</div>
@@ -489,8 +490,9 @@ export default {
               .then((response) => response.json())
               .then((json) => {
                 this.submitStatus = "OK";
-                window.location = json.redirect 
+                // window.location = json.redirect 
                 store.dispatch("products/loadItems");
+                console.log('запрос в стор')
               });
           })
           .catch((error) => {
