@@ -479,10 +479,7 @@ export default {
             return response.json();
           })
           .then((data) => {
-            this.submitStatus = "OK";
             let url = data.confirm;
-            let redirect = data.redirect 
-            console.log(data)
             fetch(url, {
               method: "GET",
               credentials: "include",
@@ -491,7 +488,8 @@ export default {
             })
               .then((response) => response.json())
               .then((json) => {
-                window.location = redirect
+                this.submitStatus = "OK";
+                window.location = json.redirect 
                 store.dispatch("products/loadItems");
               });
           })
