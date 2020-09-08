@@ -807,6 +807,10 @@ export default {
 .order_block .entity_wrap {
   margin: 20px 0;
   display: flex;
+  @media screen and (max-width: 600px) {
+    flex-direction: column;
+    text-align: left;
+  }
   & input {
     width: auto;
   }
