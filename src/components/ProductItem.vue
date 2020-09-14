@@ -367,6 +367,10 @@ tr.wrapper_list.spinner {
   }
   & td {
     padding: 15px 10px;
+
+    // padding: 15px 10px;
+    // display: flex;
+    // align-items: center;
     &:first-child {
       padding: 16px 5px;
     }
@@ -377,8 +381,16 @@ tr.wrapper_list.spinner {
   tr.wrapper_list.spinner {
     position: relative;
     &.wrapper_list {
-      display: inline-block;
+      // display: flex;
       width: 100%;
+      text-align: left;
+      & .wrap_img {
+        min-width: 100px;
+        display: inline-block;
+      }
+      & .micro_size {
+        display: inline-block;
+      }
     }
     & td {
       display: flex;
@@ -392,12 +404,13 @@ tr.wrapper_list.spinner {
         top: 0;
       }
       &.wrap_product-name {
-        width: 100%;
+        display: inline-block;
+        max-width: 185px;
       }
       &.wrap_img {
         & img {
-          max-width: 100%;
-          max-height: 100%;
+          max-width: 100px;
+          // max-height: 100%;
         }
       }
       & .inStorage {
@@ -413,10 +426,6 @@ tr.wrapper_list.spinner {
   tr.wrapper_list.spinner {
     & td {
       &.micro_size {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        padding: 7px 0;
       }
     }
   }
@@ -459,9 +468,6 @@ tr.wrapper_list.spinner {
     flex-direction: column;
     list-style: none;
     padding-left: 0;
-    @media screen and (max-width: 600px) {
-      font-size: 17px;
-    }
     & li {
       align-items: center;
     }
@@ -477,10 +483,6 @@ tr.wrapper_list.spinner {
     }
     & .char_list_material {
       display: flex;
-
-      @media screen and (max-width: 600px) {
-        font-size: 30px;
-      }
       & .select {
         position: relative;
         & select {
@@ -546,6 +548,7 @@ tr.wrapper_list.spinner {
   }
   & .wrapper_list {
     // display: flex;
+    position: relative;
     & .spinner {
       position: relative;
       & .in_spinner {
@@ -558,24 +561,28 @@ tr.wrapper_list.spinner {
   & .product-image {
     max-height: 100px;
     max-width: 100px;
+
+    @media screen and (max-width: 600px) {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      max-height: 100px;
+      margin-right: 10px;
+    }
   }
 
   & .product-name {
     box-sizing: border-box;
     text-align: left;
-     @media screen and (max-width: 600px) {
-       width: 100%;
-     }
+    @media screen and (max-width: 600px) {
+      width: 100%;
+    }
     & a {
       color: #ff9e23;
       text-decoration: underline;
       cursor: pointer;
       font-size: 13px;
-      @media screen and (max-width: 600px) {
-        font-size: 21px;
-        display: block;
-        margin-bottom: 12px;
-      }
+
     }
   }
 
@@ -589,19 +596,12 @@ tr.wrapper_list.spinner {
     padding-right: 25px;
     display: flex;
     justify-content: flex-end;
-    @media screen and (max-width: 600px) {
-      font-size: 40px;
-    }
     &:before {
       content: "РУБ";
       position: absolute;
       top: -1px;
       right: 0;
       font-size: 10px;
-      @media screen and (max-width: 600px) {
-        right: -12px;
-        font-size: 17px;
-      }
     }
   }
   & .currentSum {
@@ -611,9 +611,6 @@ tr.wrapper_list.spinner {
     display: flex;
     margin: auto;
     justify-content: center;
-    @media screen and (max-width: 600px) {
-      font-size: 40px;
-    }
     & > div {
       position: relative;
       padding-right: 25px;
@@ -623,10 +620,6 @@ tr.wrapper_list.spinner {
         top: 4px;
         right: 0;
         font-size: 10px;
-        @media screen and (max-width: 600px) {
-          right: -11px;
-          font-size: 17px;
-        }
       }
     }
   }

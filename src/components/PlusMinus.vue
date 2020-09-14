@@ -180,9 +180,6 @@ export default {
     height: 18px;
     border-width: 2px;
     margin: auto;
-    @media screen and (max-width: 600px) {
-      height: 20px;
-    }
   }
   & input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button {
@@ -209,10 +206,6 @@ export default {
           -ms-user-select: none; /* Internet Explorer/Edge */
           user-select: none;
           position: relative;
-          @media screen and (max-width: 600px) {
-            width: 45px;
-            height: 60px;
-          }
 
           &:hover {
             cursor: pointer;
@@ -360,11 +353,6 @@ export default {
     color: #b8ad87;
     font-size: 15px;
     border-radius: 0;
-    @media screen and (max-width: 600px) {
-      max-width: 60px;
-      height: 60px;
-      font-size: 30px;
-    }
   }
 
   & .product-card-buy-count-button {
