@@ -380,6 +380,7 @@ tr.wrapper_list.spinner {
 @media screen and (max-width: 600px) {
   tr.wrapper_list.spinner {
     position: relative;
+    display: block;
     &.wrapper_list {
       // display: flex;
       width: 100%;
@@ -405,7 +406,7 @@ tr.wrapper_list.spinner {
       }
       &.wrap_product-name {
         display: inline-block;
-        max-width: 185px;
+        // max-width: 185px;
       }
       &.wrap_img {
         & img {
@@ -551,6 +552,7 @@ tr.wrapper_list.spinner {
     position: relative;
     & .spinner {
       position: relative;
+      display: block;
       & .in_spinner {
         position: absolute;
         top: 0;
